@@ -202,7 +202,8 @@ ${m!=="reset"?'<label>E-post<input class="input" name="e" type="email" required 
 ${m!=="forgot"?`<label>${m==="reset"?"Nytt lösenord":"Lösenord"}<input class="input" name="p" type="password" required minlength="6" autocomplete="${m==="login"?"current-password":"new-password"}" placeholder="Minst 6 tecken"></label>`:""}
 <p id="authMsg" class="miss" role="alert"></p>
 <button class="btn" type="submit">${btn}</button></form>
-${links}</div>`}
+${links}
+<p class="muted" style="margin-top:1rem;font-size:.875rem">${su?"Genom att skapa konto godkänner du vår ":"Läs vår "}<a href="integritet.html" style="color:var(--mk-forest);font-weight:600">integritetspolicy</a>.</p></div>`}
 
 function render(){
 items.forEach(i=>{if(i.exp)i.days=daysLeft(i.exp)});
