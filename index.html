@@ -1,357 +1,194 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sv">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matkollen</title>
-<meta name="theme-color" content="#F1F5F1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F1D16" media="(prefers-color-scheme: dark)">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Matkollen">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" href="icon-192.png">
-<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap">
 <style>
-:root{--bg:#F1F5F1;--card:#fff;--ink:#11221A;--mute:#5A6B61;--line:#DCE5DE;--acc:#1B5E43;--onacc:#fff;--tint:#E1EEE6;--desk:#DDE5DE;--ok:#1F6B42;--warn:#7A4E00;--bad:#A8231B;--okbg:#D8F0DF;--warnbg:#FFE9B8;--badbg:#FFD9D4;--view:#0C1712;--flake:#8CCBEA;--dock:#11221A;--dockink:#A9BBB0;--dockact:#2A4A3B;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1D16;--card:#172A21;--ink:#E9F2EC;--mute:#8FA699;--line:#25392F;--acc:#86D8AC;--onacc:#06241A;--tint:#1D3B2D;--desk:#08120D;--ok:#7FD9A0;--warn:#F2C14E;--bad:#FF9A8F;--okbg:#16402B;--warnbg:#3F3110;--badbg:#4A211D;--view:#08120D;--flake:#E3F3FC;--dock:#223A2D;--dockink:#8FA699;--dockact:#34604A}}
-:root[data-theme="dark"]{--bg:#0F1D16;--card:#172A21;--ink:#E9F2EC;--mute:#8FA699;--line:#25392F;--acc:#86D8AC;--onacc:#06241A;--tint:#1D3B2D;--desk:#08120D;--ok:#7FD9A0;--warn:#F2C14E;--bad:#FF9A8F;--okbg:#16402B;--warnbg:#3F3110;--badbg:#4A211D;--view:#08120D;--flake:#E3F3FC;--dock:#223A2D;--dockink:#8FA699;--dockact:#34604A}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0}
-html{-webkit-text-size-adjust:100%;overscroll-behavior:none}
-body{background:var(--desk);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center;align-items:center;-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-input{-webkit-user-select:text;user-select:text}
-.phone{width:100%;max-width:400px;height:100%;max-height:800px;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden}
-@media (min-width:500px){.phone{border:1px solid var(--line);border-radius:40px;height:min(800px,96%);box-shadow:0 40px 80px -40px rgba(17,34,26,.5)}}
-header{padding:26px 22px 14px;border-bottom:1px solid transparent;transition:border-color .2s}
-header.s{border-bottom-color:var(--line)}
-h1{font-size:34px;font-weight:800;margin:0;letter-spacing:-.035em;line-height:1.05}
-.sub{color:var(--mute);font-size:15px;margin:8px 0 0;line-height:1.35}
-main{flex:1;overflow-y:auto;padding:10px 20px 24px}
-button{font:inherit;color:inherit;cursor:pointer;transition:transform .12s,background-color .15s}
-button:active{transform:scale(.98)}
-button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
-.view{background:var(--view);border-radius:32px;height:260px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.view i{position:absolute;width:38px;height:38px;border:3.5px solid #fff;opacity:.95}
-.view i:nth-child(1){top:40px;left:40px;border-right:0;border-bottom:0;border-radius:14px 0 0 0}
-.view i:nth-child(2){top:40px;right:40px;border-left:0;border-bottom:0;border-radius:0 14px 0 0}
-.view i:nth-child(3){bottom:40px;left:40px;border-right:0;border-top:0;border-radius:0 0 0 14px}
-.view i:nth-child(4){bottom:40px;right:40px;border-left:0;border-top:0;border-radius:0 0 14px 0}
-.view b{position:absolute;left:50px;right:50px;height:2px;border-radius:2px;background:#FF6B4A;box-shadow:0 0 14px 2px rgba(255,107,74,.6);animation:sc 2.4s ease-in-out infinite alternate}
-@keyframes sc{from{top:60px}to{top:196px}}
-@media (prefers-reduced-motion:reduce){.view b{animation:none;top:128px}button{transition:none}button:active{transform:none}#sp,header{transition:none}}
-.view span{color:#fff;opacity:.75;font-size:14px}
-.btn{width:100%;border:0;border-radius:999px;padding:17px;font-weight:700;font-size:16px;background:var(--acc);color:var(--onacc);margin-top:14px}
-.btn.alt{background:var(--tint);color:var(--acc)}
-.btn.dark{background:var(--ink);color:var(--bg)}
-.av{width:56px;height:56px;border-radius:50%;background:var(--acc);color:var(--onacc);font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center;flex:none}
-ol{padding-left:20px;margin:0}ol li{margin-bottom:10px;font-size:15px;line-height:1.45}
-.mut{color:var(--mute);font-size:13px}
-.hint{color:var(--mute);font-size:13px;text-align:center;margin:14px 0 0;line-height:1.4}
-.hero{background:var(--acc);color:var(--onacc);border-radius:32px;padding:30px 26px}
-.hero .big{font-size:32px;font-weight:800;letter-spacing:-.035em;line-height:1.08;margin:0 0 12px}
-.hero .sub{color:inherit;opacity:.88;margin:0;font-size:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px}
-button.card{display:block}
-.prod{display:flex;gap:14px;align-items:center}
-.ico{width:56px;height:56px;border-radius:20px;background:var(--tint);display:flex;align-items:center;justify-content:center;font-size:30px;flex:none}
-.prod h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em}
-.prod p{margin:3px 0 0;color:var(--mute);font-size:13px}
-.lbl{font-size:15px;font-weight:700;margin:24px 0 10px}
-.seg{display:flex;background:var(--tint);border-radius:999px;padding:4px;gap:4px}
-.seg button{flex:1;border:0;background:transparent;border-radius:999px;padding:11px 6px;font-size:14px;font-weight:700;color:var(--acc)}
-.seg button[aria-pressed=true]{background:var(--acc);color:var(--onacc)}
-input[type=date],input[type=text],input[type=email]{width:100%;font:inherit;font-size:16px;padding:14px 18px;border-radius:18px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
-input:focus{border-color:var(--acc)}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.step{display:flex;align-items:center;gap:12px}
-.step button{width:42px;height:42px;border-radius:50%;border:0;background:var(--tint);color:var(--acc);font-size:20px;font-weight:700}
-.step output{min-width:28px;text-align:center;font-weight:800;font-size:20px}
-.info{background:var(--okbg);color:var(--ok);border-radius:18px;padding:14px 16px;font-size:14px;font-weight:600;line-height:1.4}
-.link{background:none;border:0;color:var(--acc);font-weight:700;padding:12px 0;font-size:14px}
-nav{display:flex;gap:2px;margin:0 16px 16px;padding:6px;border-radius:999px;background:var(--dock)}
-nav button{flex:1;border:0;background:none;padding:9px 0 8px;border-radius:999px;font-size:11px;font-weight:600;color:var(--dockink);display:flex;flex-direction:column;align-items:center;gap:3px}
-nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-nav button[aria-current=page]{background:var(--dockact);color:#fff}
-.item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
-.item:first-child{padding-top:0}
-.item:last-child{border:0;padding-bottom:0}
-.item .t{flex:1;min-width:0}
-.item strong{display:block;font-size:16px;font-weight:700;letter-spacing:-.01em}
-.item small{color:var(--mute);font-size:13px}
-.stamp{width:60px;height:64px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;line-height:1}
-.stamp b{font-size:30px;font-weight:800;letter-spacing:-.04em}
-.stamp span{font-size:11px;font-weight:600;margin-top:4px}
-.chip{font-size:12px;font-weight:700;border-radius:99px;padding:6px 11px;white-space:nowrap}
-.chip::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:1px}
-.ok{background:var(--okbg);color:var(--ok)}.warn{background:var(--warnbg);color:var(--warn)}.bad{background:var(--badbg);color:var(--bad)}
-.use{border:0;background:var(--tint);color:var(--acc);border-radius:999px;padding:9px 14px;font-size:13px;font-weight:700}
-#t{position:absolute;left:20px;right:20px;bottom:98px;background:var(--ink);color:var(--bg);border-radius:20px;padding:14px 18px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s}
-#t.on{opacity:1}
-#sp{position:absolute;inset:0;z-index:9;background:#fff;overflow:hidden;animation:spf 1.9s linear forwards}
-@keyframes spf{0%,80%{opacity:1}100%{opacity:0}}
-#sp .fr{position:absolute;left:50%;top:50%;width:104px;height:152px;margin:-76px 0 0 -52px;perspective:600px;transform-origin:50% 58%;animation:spz 1.9s forwards}
-@keyframes spz{0%,45%{transform:scale(1);animation-timing-function:cubic-bezier(.6,0,.9,.5)}85%,100%{transform:scale(9)}}
-#sp .sh{position:absolute;left:10px;right:10px;bottom:-12px;height:14px;border-radius:50%;background:rgba(30,70,110,.22);filter:blur(6px)}
-#sp .bd{position:absolute;inset:0;border-radius:22px;background:linear-gradient(#62C6F2,#2B86CC)}
-#sp .in{position:absolute;inset:8px;border-radius:15px;background:var(--bg);overflow:hidden}
-#sp .in i{position:absolute;left:0;right:0;height:3px;background:var(--line)}
-#sp .in i:nth-child(1){top:46%}#sp .in i:nth-child(2){top:74%}
-#sp .dr{position:absolute;left:8px;right:8px;border-radius:15px;background:linear-gradient(#86D6F8,#3B9AD9);transform-origin:0 50%;animation:spo 1.9s ease-in-out forwards}
-#sp .d1{top:8px;height:44px}#sp .d2{top:56px;bottom:8px}
-#sp .dr::after{content:"";position:absolute;right:8px;top:10px;width:4px;height:18px;border-radius:2px;background:#fff;opacity:.9}
-#sp .d2::after{top:12px;height:30px}
-@keyframes spo{0%,22%{transform:rotateY(0)}52%,100%{transform:rotateY(-118deg)}}
-#sp .wm{position:absolute;left:0;right:0;top:calc(50% + 104px);text-align:center;font-size:24px;font-weight:800;letter-spacing:-.03em;color:#11221A;animation:spw 1.9s forwards}
-@keyframes spw{0%,30%{opacity:1}50%,100%{opacity:0}}
-@media (prefers-reduced-motion:reduce){#sp{display:none}}
-header,main,nav{position:relative;z-index:1}
-#snow{position:absolute;inset:0;overflow:hidden;pointer-events:none;display:none;z-index:0}
-.phone.snow #snow{display:block}
-#snow i{position:absolute;top:-20px;left:var(--x);width:var(--s);height:var(--s);border-radius:50%;background:var(--flake);opacity:var(--o);filter:blur(var(--b));box-shadow:0 0 8px var(--flake);animation:fall var(--d) linear var(--dl) infinite}
-@keyframes fall{0%{transform:translate(0,0)}33%{transform:translate(var(--dx),280px)}66%{transform:translate(calc(var(--dx) * -1),560px)}100%{transform:translate(0,840px)}}
-@media (prefers-reduced-motion:reduce){#snow{display:none!important}}
+:root{--mk-forest:#245B45;--mk-sage:#8EBB91;--mk-cream:#F3F6EC;--mk-white:#fff;--mk-ink:#25332B;--mk-muted:#59675E;--mk-border:#D8E0D4;--mk-warning:#D97732;--mk-danger:#B94040;
+--r-md:.875rem;--r-lg:1.25rem;--shadow:0 4px 16px rgb(36 91 69/8%);--focus:0 0 0 3px rgb(142 187 145/55%);
+--font:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--mk-cream);color:var(--mk-ink);font-family:var(--font);line-height:1.5;
+padding-top:env(safe-area-inset-top,0px)}
+#app{max-width:760px;margin:0 auto;padding:1.25rem 1rem calc(6rem + env(safe-area-inset-bottom,0px))}
+h1{font-size:1.75rem;line-height:1.2;margin:0 0 .25rem;letter-spacing:-.01em}
+h2{font-size:1.125rem;margin:1.75rem 0 .75rem}
+p{margin:0}
+.muted{color:var(--mk-muted)}
+.sub{margin-bottom:1.25rem}
+.brand{display:flex;align-items:center;gap:.5rem;color:var(--mk-forest);font-weight:750;margin-bottom:1rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.75rem;padding:.75rem 1.125rem;border:1px solid transparent;border-radius:var(--r-md);background:var(--mk-forest);color:#fff;font:inherit;font-weight:650;cursor:pointer}
+.btn:hover{background:#1C4938}
+.btn:active{transform:translateY(1px)}
+.btn--ghost{background:#fff;color:var(--mk-forest);border-color:var(--mk-border)}
+.btn--ghost:hover{background:var(--mk-cream)}
+.btn--onDark{background:#fff;color:var(--mk-forest)}
+.btn--onDark:hover{background:var(--mk-cream)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:none;box-shadow:var(--focus);border-color:var(--mk-forest)}
+.card{background:#fff;border:1px solid var(--mk-border);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:1rem}
+.stack{display:grid;gap:.75rem}
+.scan{background:var(--mk-forest);color:#fff;border-radius:var(--r-lg);padding:1.5rem;display:grid;gap:.75rem}
+.scan h2{margin:0;font-size:1.375rem}
+.scan p{color:#E3F0E3}
+.row{display:flex;align-items:center;gap:.75rem}
+.grow{flex:1;min-width:0}
+.between{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.emoji{width:2.75rem;height:2.75rem;border-radius:var(--r-md);background:var(--mk-cream);display:grid;place-items:center;font-size:1.5rem;flex:none}
+.name{font-weight:650}
+.status{display:inline-flex;align-items:center;gap:.375rem;padding:.25rem .625rem;border-radius:999px;font-size:.8125rem;font-weight:650;white-space:nowrap}
+.status::before{content:"";width:.5rem;height:.5rem;border-radius:50%;background:currentColor}
+.s-good{background:#E3F0E3;color:#245B45}
+.s-soon{background:#FFF0DF;color:#8A4312}
+.s-urgent{background:#FBE7E5;color:#8D2727}
+.input{display:block;width:100%;min-height:2.75rem;padding:.75rem .875rem;border:1px solid var(--mk-border);border-radius:var(--r-md);background:#fff;color:var(--mk-ink);font:inherit}
+.chips{display:flex;gap:.5rem;overflow-x:auto;padding:.75rem 0 .25rem;margin:0 -1rem;padding-inline:1rem}
+.chip{flex:none;min-height:2.5rem;padding:.5rem 1rem;border-radius:999px;border:1px solid var(--mk-border);background:#fff;color:var(--mk-ink);font:inherit;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--mk-forest);border-color:var(--mk-forest);color:#fff;font-weight:650}
+.tag{display:inline-block;font-size:.8125rem;font-weight:650;padding:.125rem .5rem;border-radius:.5rem;background:#E3F0E3;color:#245B45}
+.tag--save{background:#FFF0DF;color:#8A4312}
+.have{color:var(--mk-forest)}
+.miss{color:#8D2727}
+.link{background:none;border:0;padding:.5rem 0;color:var(--mk-forest);font:inherit;font-weight:650;cursor:pointer;min-height:2.75rem}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+.form{display:grid;gap:.75rem}
+label{font-weight:650;font-size:.9375rem;display:grid;gap:.25rem}
+.empty{text-align:center;padding:2rem 1rem}
+.empty .emoji{margin:0 auto .75rem;width:3.5rem;height:3.5rem;font-size:1.75rem}
+ol.steps{padding-left:1.25rem;margin:.5rem 0 0;display:grid;gap:.75rem}
+.hero{height:9rem;border-radius:var(--r-lg);background:linear-gradient(135deg,#8EBB91,#E3F0E3);display:grid;place-items:center;font-size:4rem;margin-bottom:1rem}
+nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,760px);display:grid;grid-template-columns:repeat(4,1fr);gap:.25rem;padding:.5rem .5rem calc(.5rem + env(safe-area-inset-bottom,0px));border-top:1px solid var(--mk-border);background:#fff}
+nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;min-height:3.25rem;border:0;border-radius:var(--r-md);background:transparent;color:var(--mk-muted);font:inherit;font-size:.75rem;cursor:pointer}
+nav button[aria-current=page]{background:var(--mk-cream);color:var(--mk-forest);font-weight:700}
+nav svg{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;left:50%;bottom:5.5rem;transform:translateX(-50%);background:var(--mk-ink);color:#fff;padding:.75rem 1rem;border-radius:var(--r-md);font-size:.9375rem;max-width:90%}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<div class="phone">
-<div id="sp" aria-hidden="true"><div class="fr"><div class="sh"></div><div class="bd"></div><div class="in"><i></i><i></i></div><div class="dr d1"></div><div class="dr d2"></div></div><div class="wm">Matkollen</div></div>
-<div id="snow" aria-hidden="true"></div>
-<header><h1 id="h">Skanna vara</h1><p class="sub" id="s"></p></header>
-<main id="m"></main>
-<nav><button id="n1" onclick="go('scan')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M8 9v6M12 9v6M16 9v6"/></svg>Skanna</button><button id="n2" onclick="go('list')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3zM6 11h12M9.5 6.5v1.5M9.5 14v3"/></svg>Kylskåp</button><button id="nr" onclick="go('rec')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11h14v6a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM3 11h18M9 7c0-1.6 1-1.6 1-3.2M14 7c0-1.6 1-1.6 1-3.2"/></svg>Recept</button><button id="n3" onclick="go('prof')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20.5c0-3.8 3.6-6 8-6s8 2.2 8 6"/></svg>Profil</button></nav>
-<div id="t" role="status"></div>
-</div>
+<div id="app"><main id="main"></main></div>
+<nav id="nav" aria-label="Huvudmeny"></nav>
 <script>
-const $=s=>document.querySelector(s);
-const add=n=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+n);return d};
-const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
-const fmt=d=>d.toLocaleDateString('sv-SE',{day:'numeric',month:'short'});
-const diff=d=>Math.round((d-add(0))/864e5);
-const P=[
-{n:'Mjölk 1,5 %',b:'Arla · 1 l',e:'7310865001061',d:7,i:'🥛',u:0},
-{n:'Kycklingfilé',b:'Kronfågel · 900 g',e:'7350012345678',d:3,i:'🍗',u:0},
-{n:'Okänd produkt',b:'Streckkoden finns inte i databasen',e:'7300000000017',d:5,i:'❓',u:1},
-{n:'Pasta Penne',b:'Barilla · 500 g',e:'8076802085738',d:365,i:'🍝',u:0,s:'Skafferi'},
-{n:'Yoghurt naturell',b:'Valio · 1 kg',e:'6408430000213',d:14,i:'🥣',u:0}];
-let k=0,cur=null,stor='Kyl',qty=1,exact='',nameVal='',tab='scan';
-const seed=()=>[{n:'Gurka',i:'🥒',st:'Kyl',q:1,date:add(1)},{n:'Ägg 12-pack',i:'🥚',st:'Kyl',q:1,date:add(9)}];
-let items=[],user=null,step='welcome',notif=true,when=2,via='',draft='',mail='';
-try{const u=JSON.parse(localStorage.getItem('mk')||'null');if(u&&u.name){user=u.name;notif=u.notif;when=u.when;via=u.via||'';step='done'}}catch(e){}
-function persist(){try{if(user)localStorage.setItem('mk',JSON.stringify({name:user,notif,when,via}));else localStorage.removeItem('mk')}catch(e){}}
-try{items=JSON.parse(localStorage.getItem('mk_items')||'[]').map(x=>({...x,date:new Date(x.date)}))}catch(e){items=[]}
-let names={};try{names=JSON.parse(localStorage.getItem('mk_names')||'{}')}catch(e){}
-function saveItems(){try{localStorage.setItem('mk_items',JSON.stringify(items))}catch(e){}}
-let stream=null,rd=null;
-function stopCam(){if(stream&&stream.getTracks)stream.getTracks().forEach(t=>t.stop());stream=null;if(rd){try{rd.reset()}catch(e){}rd=null}}
-async function startCam(){
- const v=$('#vid');if(!v)return;
- try{
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw 0;
-  if('BarcodeDetector' in window){
-   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-   if(!$('#vid')){stopCam();return}
-   v.srcObject=stream;await v.play();
-   const det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a']});
-   const loop=async()=>{if(!stream)return;try{const c=await det.detect(v);if(c.length){found(c[0].rawValue);return}}catch(e){}setTimeout(loop,250)};loop();
-  }else if(window.ZXing){
-   rd=new ZXing.BrowserMultiFormatReader();
-   await rd.decodeFromVideoDevice(null,'vid',r=>{if(r)found(r.getText())});
-  }else throw 0;
-  const n=$('#camnote');if(n)n.textContent='';
- }catch(e){stopCam();const n=$('#camnote');if(n)n.textContent='Kameran kunde inte startas. Skriv in streckkoden nedan eller prova en exempelvara.'}
-}
-function begin(c){stopCam();cur=c;stor=c.s||'Kyl';qty=1;exact='';nameVal='';render()}
-let busy=false;
-const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function found(code){code=String(code).trim();if(busy)return;busy=true;stopCam();
- if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}
- const b=P.find(p=>p.e===code),sv=names[code];
- if(b){busy=false;return begin({...b})}
- if(sv){busy=false;return begin({n:sv.n,b:sv.b||'Sparad av dig',e:code,i:'🛒',u:0,img:sv.img})}
- toast('Söker produkten…');
- let c={n:'Okänd produkt',b:'Hittades inte i Open Food Facts. Skriv in namnet så minns appen det.',e:code,i:'❓',u:1};
- try{
-  const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),7000);
-  const res=await fetch('https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?fields=product_name,brands,quantity,image_front_small_url',{signal:ctl.signal});
-  clearTimeout(t);
-  const j=await res.json(),p=j&&j.product;
-  if(j&&j.status===1&&p&&p.product_name){
-   const img=/^https:\/\//.test(p.image_front_small_url||'')?esc(p.image_front_small_url):'';
-   c={n:esc(p.product_name),b:esc([(p.brands||'').split(',')[0].trim(),p.quantity].filter(Boolean).join(' · '))||'Open Food Facts',e:code,i:'🛒',u:0,img};
-   names[code]={n:c.n,b:c.b,img};try{localStorage.setItem('mk_names',JSON.stringify(names))}catch(e){}
-  }
- }catch(e){c.b='Kunde inte nå produktdatabasen. Skriv in namnet så minns appen det.'}
- busy=false;begin(c)}
-function manual(){const v=$('#bc').value.replace(/\D/g,'');if(v.length<8){toast('Streckkoder har 8 eller 13 siffror');return}found(v)}
-const WH=[['2 dagar före',2],['1 dag före',1],['Samma dag',0]];
-function nameOk(){const v=$('#un').value.trim();if(!v){toast('Skriv ditt namn först');$('#un').focus();return null}return v}
-function withApple(){const v=nameOk();if(!v)return;user=v;via='Apple';step='notif';persist();render();toast('Verifierad med Apple')}
-function withMail(){const v=nameOk();if(!v)return;draft=v;step='email';render()}
-function sendCode(){const v=$('#em').value.trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){toast('Skriv en giltig e-postadress');$('#em').focus();return}mail=v;step='code';render();toast('Kod skickad till '+v)}
-function verify(){const c=$('#cd').value.replace(/\D/g,'');if(c.length!==6){toast('Skriv koden med 6 siffror');$('#cd').focus();return}user=draft;via=mail;step='notif';persist();render()}
-function back(x){step=x;render()}
-function setWhen(x){when=x;persist();render()}
-function notifOn(x){if(x){try{Notification.requestPermission()}catch(e){}}notif=x;step='done';persist();render();toast(x?'Notiser på: vi påminner dig':'Notiser av. Du kan slå på dem under Profil')}
-function toggleNotif(){notif=!notif;persist();render()}
-function logout(){user=null;via='';draft='';mail='';step='welcome';cur=null;tab='scan';items=[];saveItems();persist();render()}
-const whenSeg=()=>`<div class="seg">${WH.map(w=>`<button aria-pressed="${when===w[1]}" onclick="setWhen(${w[1]})">${w[0]}</button>`).join('')}</div>`;
-let openR=null;
-const R=[
-{n:'Pannkakor',i:'🥞',t:'25 min',g:['ägg','mjölk'],x:'mjöl, smör, salt',s:['Vispa ihop ägg, mjölk och mjöl till en slät smet.','Låt smeten vila i 10 minuter.','Stek tunna pannkakor i smör på medelvärme.']},
-{n:'Kycklingpasta',i:'🍝',t:'30 min',g:['kyckling','pasta','grädde'],x:'salt, peppar, olja',s:['Koka pastan enligt förpackningen.','Skär kycklingen i bitar och stek den i olja tills den är genomstekt.','Häll i grädden, smaka av med salt och peppar och vänd ner pastan.']},
-{n:'Kycklingsallad med yoghurtdressing',i:'🥗',t:'20 min',g:['kyckling','gurka','yoghurt'],x:'salt, peppar, olja',s:['Stek kycklingen i olja och låt den svalna lite.','Skiva gurkan och lägg den på tallriken.','Rör ihop yoghurt, salt och peppar till en dressing och lägg på kycklingen.']},
-{n:'Tzatziki',i:'🥒',t:'10 min',g:['gurka','yoghurt'],x:'vitlök, salt, olja',s:['Riv gurkan och krama ut vätskan.','Blanda med yoghurt, pressad vitlök, salt och en skvätt olja.','Låt stå kallt en stund innan servering.']},
-{n:'Äggpasta',i:'🍳',t:'15 min',g:['pasta','ägg'],x:'smör, salt, peppar',s:['Koka pastan och spara lite av kokvattnet.','Stek äggen i smör.','Vänd pastan med smör och lite kokvatten och lägg äggen ovanpå.']},
-{n:'Köttbullar med gräddsås',i:'🧆',t:'40 min',g:['färs','grädde'],x:'ströbröd, ägg, lök, smör, mjöl, salt, peppar',s:['Blanda färsen med fuktat ströbröd, rivet lök, salt och peppar och rulla bollar.','Stek bullarna i smör tills de är genomstekta och ta upp dem.','Rör mjöl i pannan, späd med grädde och vatten och koka en sås. Lägg tillbaka bullarna.']},
-{n:'Raggmunk',i:'🥔',t:'35 min',g:['potatis','fläsk'],x:'mjöl, mjölk, ägg, smör, salt',s:['Riv potatisen grovt och rör ihop med mjöl, mjölk, ägg och salt.','Stek små plättar i smör tills de är gyllene på båda sidor.','Stek fläsket knaprigt och servera tillsammans.']},
-{n:'Pytt i panna',i:'🍳',t:'25 min',g:['potatis','korv'],x:'lök, smör, salt, peppar',s:['Skär potatis, korv och lök i små tärningar.','Stek potatisen i smör tills den är gyllene, lägg i korv och lök.','Stek tills allt är varmt och krispigt och krydda med salt och peppar.']},
-{n:'Ärtsoppa',i:'🥣',t:'1 tim 30 min',g:['ärtor','fläsk'],x:'lök, timjan, salt',s:['Blötlägg gula ärtor över natten och häll av vattnet.','Koka ärtorna med fläsket och hackad lök i nytt vatten i cirka 1 timme.','Ta upp fläsket, skär det i bitar och lägg tillbaka i soppan.']},
-{n:'Falukorv i ugn',i:'🌭',t:'35 min',g:['falukorv'],x:'senap, ketchup, ost',s:['Gör djupa snitt i korven och pensla med senap.','Fyll snitten med ost.','Grädda i 200 grader i cirka 25 minuter.']},
-{n:'Stekt sill med potatismos',i:'🐟',t:'35 min',g:['sill','potatis'],x:'ströbröd, smör, mjölk, salt',s:['Koka potatisen mjuk och mosa den med smör och varm mjölk.','Vänd sillfiléerna i ströbröd.','Stek dem i smör tills de är gyllene och servera med moset.']},
-{n:'Fiskgratäng',i:'🐟',t:'45 min',g:['fisk','grädde'],x:'potatis, ost, dill, salt',s:['Skiva kokt potatis och lägg i en form med fiskbitarna.','Häll över grädde med dill och salt och strö över ost.','Grädda i 200 grader i 25 minuter.']},
-{n:'Lax i ugn',i:'🍣',t:'30 min',g:['lax','potatis'],x:'dill, citron, smör, salt',s:['Lägg laxen i en form, salta och lägg citron och dill ovanpå.','Grädda i 175 grader i cirka 15 minuter.','Servera med kokt potatis och smör.']},
-{n:'Kåldolmar',i:'🥬',t:'1 tim 15 min',g:['kål','färs'],x:'ris, sirap, smör, salt',s:['Förkoka kålbladen och blanda färsen med kokt ris och salt.','Rulla in fyllningen i kålbladen och lägg dem i en form.','Pensla med smör och sirap och grädda i 175 grader i cirka 50 minuter.']},
-{n:'Kalops',i:'🍲',t:'2 tim',g:['nötkött','lök'],x:'kryddpeppar, lagerblad, smör, salt',s:['Bryn köttbitarna och lök i smör.','Tillsätt vatten, kryddpeppar och lagerblad.','Koka på låg värme i cirka 1 timme och 30 minuter tills köttet är mört.']},
-{n:'Stekt fläsk med löksås',i:'🥓',t:'30 min',g:['fläsk','lök'],x:'mjöl, mjölk, smör, salt',s:['Stek fläsket i en torr panna tills det är knaprigt.','Fräs skivad lök i smör, rör i mjöl och späd med mjölk.','Koka såsen tjock och smaka av med salt.']},
-{n:'Korv stroganoff',i:'🌭',t:'25 min',g:['korv','grädde'],x:'lök, tomatpuré, ris, salt',s:['Skär korven i bitar och stek den med lök.','Rör i tomatpuré och grädde och låt sjuda några minuter.','Servera med kokt ris.']},
-{n:'Panerad fläskkotlett',i:'🍖',t:'30 min',g:['kotlett'],x:'ägg, ströbröd, mjöl, smör, salt',s:['Vänd kotletterna först i mjöl, sedan i uppvispat ägg och ströbröd.','Stek dem i smör tills de är gyllene.','Stek vidare på låg värme tills de är genomstekta.']},
-{n:'Wallenbergare',i:'🍔',t:'40 min',g:['kalvfärs','grädde'],x:'ägg, ströbröd, smör, salt',s:['Rör ihop färs, grädde, äggula och salt till en smet.','Forma biffar och vänd dem i ströbröd.','Stek i smör tills de är genomstekta.']},
-{n:'Biff Lindström',i:'🍔',t:'35 min',g:['färs','rödbetor'],x:'lök, kapris, ägg, smör, salt',s:['Blanda färsen med hackade rödbetor, lök, kapris och ägg.','Forma biffar.','Stek i smör tills de är genomstekta.']},
-{n:'Janssons frestelse',i:'🥔',t:'1 tim',g:['potatis','grädde'],x:'lök, ansjovis, ströbröd, smör',s:['Skiva potatis i stavar och varva med lök och ansjovis i en form.','Häll över grädden, strö ströbröd på toppen och lägg på smörklickar.','Grädda i 200 grader i cirka 45 minuter.']},
-{n:'Potatisgratäng',i:'🥔',t:'1 tim 10 min',g:['potatis','grädde'],x:'vitlök, ost, salt, peppar',s:['Skiva potatisen tunt och lägg i en smord form.','Häll över grädde med vitlök, salt och peppar och strö över ost.','Grädda i 175 grader i cirka 50 minuter.']},
-{n:'Köttfärssås med spaghetti',i:'🍝',t:'35 min',g:['färs','pasta','tomat'],x:'lök, vitlök, olja, salt, peppar',s:['Bryn färsen med lök och vitlök.','Tillsätt krossade tomater och sjud i 20 minuter.','Koka pastan och servera såsen ovanpå.']},
-{n:'Makaronilåda',i:'🍝',t:'1 tim',g:['makaroner','ägg','skinka'],x:'mjölk, ost, salt',s:['Koka makaronerna och blanda med skinkbitar i en form.','Vispa ihop ägg och mjölk och häll över.','Strö över ost och grädda i 200 grader i cirka 30 minuter.']},
-{n:'Ugnspannkaka med fläsk',i:'🥞',t:'1 tim',g:['ägg','mjölk','fläsk'],x:'mjöl, salt',s:['Rör ihop ägg, mjölk, mjöl och salt till en smet.','Lägg fläsktärningar i en form och häll över smeten.','Grädda i 225 grader i cirka 40 minuter.']},
-{n:'Kassler med potatis',i:'🍖',t:'45 min',g:['kassler','potatis'],x:'senap, smör',s:['Lägg kasslern i en form och pensla med senap.','Grädda i 175 grader tills den är genomvarm.','Koka potatisen och servera med smör.']},
-{n:'Stuvade makaroner',i:'🍝',t:'25 min',g:['makaroner','mjölk'],x:'smör, mjöl, salt, peppar',s:['Koka makaronerna.','Smält smör, rör i mjöl och späd med mjölk till en tjock sås.','Vänd ner makaronerna och smaka av med salt och peppar.']},
-{n:'Stuvad spenat med ägg',i:'🥬',t:'20 min',g:['spenat','ägg'],x:'smör, mjöl, mjölk, muskot, salt',s:['Smält smör, rör i mjöl och späd med mjölk.','Blanda i spenaten och krydda med muskot och salt.','Servera med halverade hårdkokta ägg.']},
-{n:'Köttsoppa',i:'🍲',t:'1 tim 30 min',g:['nötkött','morot','potatis'],x:'lök, lagerblad, salt, peppar',s:['Koka köttet mört med lök och lagerblad i cirka 1 timme.','Tillsätt tärnade morötter och potatis.','Koka tills grönsakerna är mjuka och smaka av.']},
-{n:'Kycklinggryta',i:'🍗',t:'40 min',g:['kyckling','morot'],x:'lök, buljong, mjöl, salt, peppar',s:['Bryn kycklingbitar och lök.','Tillsätt morötter och buljong och koka i cirka 25 minuter.','Red av med lite mjöl och smaka av.']},
-{n:'Rotmos',i:'🥕',t:'35 min',g:['potatis','morot'],x:'smör, salt, peppar',s:['Koka potatis och morötter mjuka.','Häll av vattnet och mosa med smör.','Smaka av med salt och peppar.']},
-{n:'Brässad kål',i:'🥬',t:'1 tim',g:['kål'],x:'smör, sirap, vinäger, salt',s:['Skär kålen fint och bryn den i smör.','Tillsätt sirap och vatten.','Sjud tills kålen är mjuk och smaka av med vinäger och salt.']},
-{n:'Havregrynsgröt',i:'🥣',t:'10 min',g:['havregryn','mjölk'],x:'salt',s:['Koka upp mjölken eller vatten med lite salt.','Rör ner havregrynen.','Sjud 5 minuter under omrörning.']},
-{n:'Rispudding',i:'🍚',t:'45 min',g:['ris','mjölk'],x:'smör, salt, kanel',s:['Koka riset med mjölk och lite salt.','Sjud på låg värme under omrörning tills riset är mjukt och gröten tjock.','Servera med kanel och smörklick.']},
-{n:'Blomkålssoppa',i:'🥣',t:'30 min',g:['blomkål','potatis'],x:'lök, buljong, grädde, salt',s:['Koka blomkål, potatis och lök i buljong tills allt är mjukt.','Mixa slätt.','Rör i grädde och smaka av.']},
-{n:'Kycklingsoppa',i:'🍲',t:'40 min',g:['kyckling','morot'],x:'lök, buljong, nudlar, salt',s:['Koka kycklingen i buljong tills den är genomkokt.','Riv kycklingen i bitar och lägg tillbaka.','Koka morötter och nudlar i soppan tills de är mjuka.']},
-{n:'Tomatsoppa',i:'🍅',t:'25 min',g:['tomat','grädde'],x:'lök, buljong, basilika, salt',s:['Fräs lök och tillsätt krossade tomater och buljong.','Sjud i 15 minuter och mixa slätt.','Rör i grädde och smaka av.']},
-{n:'Purjolökssoppa',i:'🥣',t:'30 min',g:['potatis','purjolök'],x:'buljong, smör, grädde, salt',s:['Fräs skivad purjolök i smör.','Tillsätt potatis och buljong och koka mjukt.','Mixa slätt och rör i grädde.']},
-{n:'Omelett med skinka',i:'🍳',t:'10 min',g:['ägg','skinka'],x:'smör, salt, ost',s:['Vispa ägg med salt.','Stek i smör, lägg skinka och ost på ena halvan.','Vik ihop och servera direkt.']},
-{n:'Ägg i senapssås',i:'🥚',t:'20 min',g:['ägg','senap'],x:'smör, mjöl, mjölk, salt',s:['Hårdkoka äggen och skala dem.','Gör en ljus sås av smör, mjöl och mjölk och rör i senap.','Lägg äggen i såsen och servera med potatis.']},
-{n:'Köttfärslimpa',i:'🍖',t:'1 tim 10 min',g:['färs','mjölk'],x:'ägg, ströbröd, lök, salt, peppar',s:['Blanda färs, fuktat ströbröd, ägg, hackad lök och kryddor.','Forma en limpa i en form.','Grädda i 200 grader i cirka 45 minuter.']},
-{n:'Fläskfilé med champinjonsås',i:'🍄',t:'35 min',g:['fläskfilé','champinjoner'],x:'grädde, smör, salt, peppar',s:['Stek filéskivorna i smör tills de är genomstekta och ta upp dem.','Stek skivade champinjoner i samma panna.','Tillsätt grädde, koka ihop till en sås och lägg tillbaka köttet.']},
-{n:'Kycklinglår med potatis',i:'🍗',t:'55 min',g:['kyckling','potatis'],x:'olja, paprikakrydda, salt, peppar',s:['Lägg kycklinglår och klyftad potatis i en form.','Ringla över olja och strö över krydda och salt.','Grädda i 200 grader i cirka 40 minuter tills kycklingen är genomstekt.']},
-{n:'Stekt strömming',i:'🐟',t:'30 min',g:['strömming','potatis'],x:'ströbröd, smör, salt',s:['Salta strömmingsfiléerna och vänd dem i ströbröd.','Stek dem i smör tills de är gyllene.','Servera med kokt potatis eller potatismos.']},
-{n:'Västerbottenpaj',i:'🥧',t:'1 tim',g:['ost','ägg'],x:'grädde, pajdeg, lök',s:['Klä en form med pajdeg.','Blanda ost, ägg, grädde och lök och häll i formen.','Grädda i 200 grader i cirka 30 minuter.']},
-{n:'Lövbiff med lök',i:'🥩',t:'25 min',g:['biff','lök'],x:'smör, salt, peppar',s:['Stek skivad lök i smör tills den är gyllene och ta upp.','Stek biffskivorna snabbt i het panna.','Salta och peppra och servera med löken.']},
-{n:'Stekt rödspätta',i:'🐟',t:'25 min',g:['rödspätta'],x:'mjöl, smör, citron, salt',s:['Salta filéerna och vänd dem i mjöl.','Stek i smör i cirka 2 minuter på varje sida.','Servera med citron och kokt potatis.']},
-{n:'Torsk med äggsås',i:'🐟',t:'35 min',g:['torsk','ägg'],x:'smör, mjöl, mjölk, salt',s:['Pochera torskbitarna i lätt saltat vatten tills de är klara.','Gör en vit sås av smör, mjöl och mjölk och rör i hackade ägg.','Servera med kokt potatis.']},
-{n:'Morotssoppa',i:'🥕',t:'30 min',g:['morot','potatis'],x:'lök, buljong, ingefära, salt',s:['Fräs lök och tillsätt morötter, potatis och buljong.','Koka mjukt och mixa slätt.','Smaka av med ingefära och salt.']},
-{n:'Bruna bönor med fläsk',i:'🥓',t:'1 tim',g:['bruna bönor','fläsk'],x:'vinäger, sirap, salt',s:['Koka bönorna mjuka och häll av dem.','Stek fläskbitarna.','Sjud ihop allt med sirap och vinäger.']},
-{n:'Stekt lever med lök',i:'🍽️',t:'20 min',g:['lever','lök'],x:'smör, mjöl, salt, peppar',s:['Vänd leverskivorna i mjöl.','Stek lök i smör och ta upp.','Stek levern snabbt, 1 till 2 minuter per sida, och servera med lök.']},
-{n:'Grillad korv med potatismos',i:'🌭',t:'30 min',g:['korv','potatis'],x:'mjölk, smör, salt',s:['Koka potatisen mjuk och mosa med smör och mjölk.','Stek eller grilla korven.','Servera med senap.']},
-{n:'Laxsoppa',i:'🍲',t:'35 min',g:['lax','potatis'],x:'grädde, buljong, dill, salt',s:['Koka potatistärningar i buljong.','Tillsätt laxbitar och grädde och sjud i några minuter.','Strö över dill och smaka av.']},
-{n:'Äppelkaka',i:'🍎',t:'1 tim',g:['äpple'],x:'smör, mjöl, socker, kanel',s:['Skiva äpplena och lägg dem i en smord form.','Smula ihop smör, mjöl och socker och strö över.','Grädda i 200 grader i cirka 30 minuter.']},
-{n:'Våfflor',i:'🧇',t:'20 min',g:['ägg','mjölk'],x:'mjöl, smör, socker',s:['Rör ihop ägg, mjölk, mjöl och smält smör till en smet.','Gräddas i ett våffeljärn.','Servera med sylt och grädde.']}];
-function info(r){const m=r.g.map(k=>({k,x:items.find(x=>x.n.toLowerCase().includes(k))}));const have=m.filter(a=>a.x);const miss=m.filter(a=>!a.x).map(a=>a.k);const urg=have.reduce((t,a)=>{const d=diff(a.x.date);return t+(d<=1?3:d<=3?2:1)},0);const soon=have.length?have.reduce((a,b)=>a.x.date<=b.x.date?a:b):null;return{m,have,miss,urg,soon}}
-function openRec(i){openR=i;render()}
-function cook(i){info(R[i]).have.forEach(a=>{const j=items.indexOf(a.x);if(j<0)return;if(items[j].q>1)items[j].q--;else items.splice(j,1)});openR=null;saveItems();render();toast('Bra! Ingredienserna är borttagna från kylskåpet')}
-function toast(x){const t=$('#t');t.textContent=x;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200)}
-function go(x){tab=x;cur=null;openR=null;render()}
-function scan(){begin({...P[k%P.length]});k++}
-function setStor(x){stor=x;render()}
-function chg(n){qty=Math.max(1,qty+n);render()}
-function save(){
- const v=$('#dt').value;
- if(!v){toast('Fyll i bäst före-datum först');$('#dt').focus();return}
- const name=cur.u?($('#nm').value.trim()||'Okänd vara'):cur.n;
- const date=new Date(v+'T00:00:00');
- items.push({n:name,i:cur.u?'🛒':cur.i,st:stor,q:qty,date});if(cur.u){names[cur.e]={n:name};try{localStorage.setItem('mk_names',JSON.stringify(names))}catch(e){}}saveItems();
- toast(name+' sparad. Redo för nästa vara.');cur=null;render()}
-function use(x){items.splice(x,1);saveItems();render();toast('Borttagen från listan')}
-function stamp(n){const c=n<=1?'bad':n<=3?'warn':'ok';return `<div class="stamp ${c}"><b>${n<0?'!':n}</b><span>${n<0?'utgånget':n===0?'idag':n===1?'dag':'dagar'}</span></div>`}
-function chip(n){const c=n<=1?'bad':n<=3?'warn':'ok';const t=n<0?'Utgånget':n===0?'Går ut idag':n===1?'Går ut imorgon':'Om '+n+' dagar';return `<span class="chip ${c}">${t}</span>`}
-function render(){
- stopCam();
- $('.phone').classList.toggle('snow',user?(step==='done'&&tab==='scan'&&!cur):step==='welcome');
- const e=$('#dt');if(e)exact=e.value;const q=$('#nm');if(q)nameVal=q.value;
- $('nav').style.display=user&&step==='done'?'flex':'none';
- const m=$('#m');
- const u0=$('#un');if(u0)draft=u0.value;
- if(!user){
-  if(step==='email'){
-   $('#h').textContent='Verifiera med e-post';$('#s').textContent='Vi skickar en kod till din e-post';
-   m.innerHTML=`<div class="lbl">E-postadress</div><input id="em" type="email" value="${mail}" placeholder="namn@exempel.se" autocomplete="email" aria-label="E-postadress" onkeydown="if(event.key==='Enter')sendCode()">
-   <button class="btn" onclick="sendCode()">Skicka kod</button><button class="btn alt" style="margin-top:10px" onclick="back('welcome')">Tillbaka</button>`;return}
-  if(step==='code'){
-   $('#h').textContent='Skriv koden';$('#s').textContent='Vi skickade en 6-siffrig kod till '+mail;
-   m.innerHTML=`<div class="lbl">Kod</div><input id="cd" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code" aria-label="Kod från e-post" onkeydown="if(event.key==='Enter')verify()">
-   <button class="btn" onclick="verify()">Verifiera</button><button class="link" style="width:100%" onclick="toast('Ny kod skickad')">Skicka ny kod</button><button class="btn alt" onclick="back('email')">Byt e-postadress</button>`;return}
-  $('#h').textContent='Välkommen till Matkollen';$('#s').textContent='Skapa ditt konto';
-  m.innerHTML=`<div class="hero"><p class="big">Slut på bortkastad mat</p><p class="sub">Skanna det du handlat, fyll i bäst före-datum och få en påminnelse innan det går ut.</p></div>
-  <div class="lbl">Vad heter du?</div><input id="un" type="text" value="${draft}" placeholder="Ditt namn" autocomplete="name" aria-label="Ditt namn">
-  <p class="hint" style="text-align:left;margin:8px 0 0">Namnet visas bara för dig i appen.</p>
-  <div class="lbl">Verifiera ditt konto med</div>
-  <button class="btn dark" style="margin-top:0" onclick="withApple()">Fortsätt med Apple</button><button class="btn alt" style="margin-top:10px" onclick="withMail()">Fortsätt med e-post</button><p class="hint">Dina uppgifter stannar på din telefon.</p>`;return}
- if(step==='notif'){
-  $('#h').textContent='Hej '+user+'!';$('#s').textContent='Ditt konto är skapat';
-  m.innerHTML=`<div class="card"><p style="margin:0 0 4px;font-weight:600">Vill du få notiser?</p><p class="sub" style="margin:0">Vi skickar en påminnelse när något snart går ut, så att du hinner använda det.</p></div>
-  <div class="lbl">När vill du bli påmind?</div>${whenSeg()}
-  <button class="btn" onclick="notifOn(true)">Slå på notiser</button><button class="btn alt" style="margin-top:10px" onclick="notifOn(false)">Inte nu</button>`;return}
- $('#nr').setAttribute('aria-current',tab==='rec'?'page':'false');$('#n3').setAttribute('aria-current',tab==='prof'?'page':'false');
- $('#n1').setAttribute('aria-current',tab==='scan'?'page':'false');
- $('#n2').setAttribute('aria-current',tab==='list'?'page':'false');
- if(tab==='rec'){
-  $('#h').textContent='Recept';$('#s').textContent='Förslag på det du har hemma, det som går ut först överst';
-  if(openR!==null){const r=R[openR],f=info(r);
-   m.innerHTML=`<div class="card"><div class="prod"><div class="ico">${r.i}</div><div><h2>${r.n}</h2><p>${r.t}</p></div></div></div>
-   <div class="lbl">Ingredienser</div><div class="card">${f.m.map(a=>`<div class="row" style="padding:6px 0"><span style="font-weight:600">${a.k[0].toUpperCase()+a.k.slice(1)}</span>${a.x?chip(diff(a.x.date)):'<span class="mut">Saknas</span>'}</div>`).join('')}<p class="mut" style="margin:8px 0 0">Basvaror: ${r.x}</p></div>
-   <div class="lbl">Gör så här</div><div class="card"><ol>${r.s.map(x=>`<li>${x}</li>`).join('')}</ol></div>
-   <button class="btn" onclick="cook(${openR})">Jag lagar detta</button><button class="btn alt" style="margin-top:10px" onclick="openRec(null)">Tillbaka till recepten</button>`;return}
-  const L=R.map((r,i)=>({r,i,f:info(r)})).filter(o=>o.f.have.length).sort((a,b)=>(b.f.urg-b.f.miss.length*2)-(a.f.urg-a.f.miss.length*2)).slice(0,20);
-  m.innerHTML=L.length?L.map(o=>`<button class="card" style="width:100%;text-align:left;margin-bottom:12px" onclick="openRec(${o.i})"><div class="prod"><div class="ico">${o.r.i}</div><div style="flex:1"><h2 style="font-size:16px">${o.r.n}</h2><p>${o.r.t} · Du har ${o.f.have.length} av ${o.r.g.length}</p></div></div><div class="row" style="margin-top:10px"><span class="mut">Använder ${o.f.soon.x.n}</span>${chip(diff(o.f.soon.x.date))}</div>${o.f.miss.length?`<p class="mut" style="margin:8px 0 0">Saknas: ${o.f.miss.join(', ')}</p>`:''}</button>`).join(''):'<p class="hint">Skanna några varor först, så föreslår vi vad du kan laga.</p>';return}
- if(tab==='prof'){
-  $('#h').textContent='Profil';$('#s').textContent='Ditt konto och dina notiser';
-  m.innerHTML=`<div class="card"><div class="prod"><div class="av">${user[0].toUpperCase()}</div><div><h2>${user}</h2><p>Verifierad med ${via||'e-post'}</p></div></div></div>
-  <div class="lbl">Notiser</div><div class="row card"><span style="font-weight:600">${notif?'På':'Av'}</span><button class="use" onclick="toggleNotif()">${notif?'Slå av':'Slå på'}</button></div>
-  ${notif?`<div class="lbl">Påminn mig</div>${whenSeg()}`:''}
-  ${installCard()}<button class="btn alt" style="margin-top:22px" onclick="logout()">Logga ut</button>`;return}
- if(tab==='list'){
-  $('#h').textContent='Mitt kylskåp';$('#s').textContent=items.length+' varor, sorterade efter utgångsdatum';
-  const s=[...items].sort((a,b)=>a.date-b.date);
-  const soon=items.filter(x=>diff(x.date)<=when);const ban=notif&&soon.length?`<div class="info" style="margin-bottom:12px;background:var(--warnbg);color:var(--warn)">Påminnelse: ${soon.map(x=>x.n).join(', ')} går ut snart</div>`:'';
-  m.innerHTML=ban+(s.length?`<div class="card">${s.map(x=>`<div class="item">${stamp(diff(x.date))}<div class="t"><strong>${x.i} ${x.n}${x.q>1?' ×'+x.q:''}</strong><small>${x.st} · bäst före ${fmt(x.date)}</small></div><button class="use" onclick="use(${items.indexOf(x)})">Använd</button></div>`).join('')}</div>`:'<p class="hint">Inget här än. Skanna din första vara.</p>');
-  return}
- if(!cur){
-  $('#h').textContent='Skanna vara';$('#s').textContent='Rikta kameran mot streckkoden';
-  m.innerHTML=`<div class="view"><video id="vid" playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video><i></i><i></i><i></i><i></i><b></b><span id="camnote" style="position:relative;padding:0 24px;text-align:center">Startar kameran…</span></div>
-  <div class="row" style="margin-top:12px"><input id="bc" type="text" inputmode="numeric" placeholder="Eller skriv streckkoden" aria-label="Streckkod" onkeydown="if(event.key==='Enter')manual()"><button class="use" style="padding:12px 16px" onclick="manual()">Sök</button></div>
-  <button class="link" style="width:100%" onclick="scan()">Prova med en exempelvara</button>`;startCam();return}
- $('#h').textContent='Lägg till vara';$('#s').textContent='Streckkod '+cur.e;
- m.innerHTML=`<div class="card"><div class="prod"><div class="ico" style="overflow:hidden">${cur.img?`<img src="${cur.img}" alt="" style="width:100%;height:100%;object-fit:cover">`:cur.i}</div><div>${cur.u?`<input id="nm" type="text" placeholder="Skriv vad varan heter" value="${esc(nameVal)}" aria-label="Namn på varan">`:`<h2>${cur.n}</h2>`}<p>${cur.b}</p></div></div></div>
- <div class="lbl">Förvaring</div><div class="seg">${['Kyl','Frys','Skafferi'].map(x=>`<button aria-pressed="${stor===x}" onclick="setStor('${x}')">${x}</button>`).join('')}</div>
- <div class="lbl">Bäst före-datum</div><input id="dt" type="date" value="${exact}" aria-label="Bäst före-datum"><p class="hint" style="text-align:left;margin-top:8px">Titta på förpackningen och välj datumet som står där.</p>
- <div class="lbl">Antal</div><div class="row"><span class="sub">Hur många förpackningar?</span><div class="step"><button onclick="chg(-1)" aria-label="Minska">−</button><output>${qty}</output><button onclick="chg(1)" aria-label="Öka">+</button></div></div>
- <button class="btn" onclick="save()">Spara och skanna nästa</button><button class="btn alt" style="margin-top:10px" onclick="cur=null;render()">Avbryt</button>`}
+const ICONS={
+scan:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/></svg>',
+fridge:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M6 10h12M9 6v1.5M9 13v3"/></svg>',
+recipe:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-2-1.5-5-1.5-8-1v14c3-.5 6-.5 8 1 2-1.5 5-1.5 8-1V4c-3-.5-6-.5-8 1zM12 5v14"/></svg>',
+profile:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg>'};
+const LEAF='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#245B45" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14zM5 19c3-4 6-7 10-9"/></svg>';
+const TABS=[["scan","Skanna"],["fridge","Kylskåp"],["recipe","Recept"],["profile","Profil"]];
+const CATS=["Alla","Grönsaker","Mejeri","Kött","Annat"];
+const EMO={Grönsaker:"🥬",Mejeri:"🥛",Kött:"🍗",Annat:"🥫"};
 
-const hd=document.querySelector('header');$('#m').addEventListener('scroll',e=>hd.classList.toggle('s',e.target.scrollTop>4),{passive:true});
-const isStd=()=>window.navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
-const isIos=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-let dip=null;
-addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;if(tab==='prof'&&user&&step==='done')render()});
-addEventListener('appinstalled',()=>{dip=null;if(user&&step==='done')render()});
-function doInstall(){if(!dip)return;dip.prompt();dip.userChoice.finally(()=>{dip=null;render()})}
-function installCard(){
- if(isStd())return'';
- if(dip)return `<div class="lbl">Installera appen</div><div class="card"><p class="mut" style="margin:0;font-size:14px;line-height:1.5">Lägg Matkollen på hemskärmen så öppnas den som en vanlig app.</p><button class="btn" style="margin-top:14px" onclick="doInstall()">Installera Matkollen</button></div>`;
- if(isIos())return `<div class="lbl">Installera appen</div><div class="card"><p style="margin:0 0 6px;font-weight:700">Lägg till på hemskärmen</p><p class="mut" style="margin:0;font-size:14px;line-height:1.5">Öppna sidan i Safari, tryck på Dela-knappen och välj Lägg till på hemskärmen. Då öppnas Matkollen i helskärm som en riktig app.</p></div>`;
- return''}
-if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-{const sp=$('#sp');if(sp){sp.addEventListener('animationend',e=>{if(e.target===sp)sp.remove()});setTimeout(()=>{if(sp.isConnected)sp.remove()},4000)}}
-{const sn=$('#snow');for(let i=0;i<30;i++){const e=document.createElement('i'),z=3+Math.random()*7;e.style.cssText=`--x:${(Math.random()*100).toFixed(1)}%;--s:${z.toFixed(1)}px;--o:${(.35+Math.random()*.45).toFixed(2)};--b:${z>7?1.2:0}px;--d:${(9+Math.random()*10).toFixed(1)}s;--dl:-${(Math.random()*14).toFixed(1)}s;--dx:${Math.round(Math.random()*40-20)}px`;sn.appendChild(e)}}
+let items=[
+{id:1,name:"Spenat",cat:"Grönsaker",days:0,qty:"1 påse",e:"🥬"},
+{id:2,name:"Mjölk",cat:"Mejeri",days:1,qty:"1 liter",e:"🥛"},
+{id:3,name:"Kycklingfilé",cat:"Kött",days:2,qty:"500 g",e:"🍗"},
+{id:4,name:"Yoghurt",cat:"Mejeri",days:2,qty:"1 burk",e:"🥣"},
+{id:5,name:"Grädde",cat:"Mejeri",days:3,qty:"2 dl",e:"🥛"},
+{id:6,name:"Paprika",cat:"Grönsaker",days:5,qty:"2 st",e:"🫑"},
+{id:7,name:"Ägg",cat:"Mejeri",days:9,qty:"10 st",e:"🥚"},
+{id:8,name:"Morot",cat:"Grönsaker",days:12,qty:"1 kg",e:"🥕"},
+{id:9,name:"Ost",cat:"Mejeri",days:14,qty:"400 g",e:"🧀"}];
+const RECIPES=[
+{id:1,name:"Spenatomelett",min:15,e:"🍳",serv:2,ing:["Ägg","Spenat","Ost","Smör"],steps:["Vispa äggen med en nypa salt.","Fräs spenaten i smör tills den faller ihop.","Häll över äggen och strö på riven ost.","Stek på medelvärme tills omeletten stelnat och vik ihop."]},
+{id:2,name:"Krämig kycklinggryta",min:35,e:"🍲",serv:4,ing:["Kycklingfilé","Paprika","Grädde","Ris"],steps:["Skär kycklingen och paprikan i bitar.","Bryn kycklingen och fräs paprikan med.","Tillsätt grädde och låt sjuda i 10 minuter.","Servera med kokt ris."]},
+{id:3,name:"Morotssoppa",min:40,e:"🥕",serv:4,ing:["Morot","Grädde","Lök"],steps:["Fräs hackad lök mjuk.","Tillsätt morötter och vatten, koka tills de är mjuka.","Mixa slätt och rör i grädden.","Smaksätt med salt och peppar."]},
+{id:4,name:"Yoghurtpannkakor",min:20,e:"🥞",serv:3,ing:["Ägg","Mjölk","Yoghurt","Vetemjöl"],steps:["Rör ihop ägg, mjölk, yoghurt och mjöl till en slät smet.","Låt smeten vila några minuter.","Stek små pannkakor i smör på medelvärme."]}];
+let st={tab:"scan",cat:"Alla",q:"",adding:false,recipe:null,favs:new Set(),onlyFav:false};
+const $=s=>document.querySelector(s);
+const status=d=>d<=0?["urgent","Behöver användas idag"]:d<=3?["soon","Använd snart"]:["good","Bra"];
+const badge=d=>{const[k,t]=status(d);return`<span class="status s-${k}">${t}</span>`};
+const left=d=>d<=0?"Går ut idag":d===1?"1 dag kvar":d+" dagar kvar";
+const sorted=()=>[...items].sort((a,b)=>a.days-b.days);
+const has=n=>items.find(i=>i.name.toLowerCase()===n.toLowerCase());
+function rInfo(r){const have=[],miss=[];let urgent=false;r.ing.forEach(n=>{const it=has(n);if(it){have.push(n);if(it.days<=3)urgent=true}else miss.push(n)});return{have,miss,urgent,score:(urgent?100:0)+have.length*5-miss.length}}
+const ranked=()=>RECIPES.map(r=>({r,...rInfo(r)})).filter(x=>x.have.length).sort((a,b)=>b.score-a.score);
+
+function itemCard(i){return`<div class="card"><div class="row"><div class="emoji" aria-hidden="true">${i.e}</div><div class="grow"><div class="name">${i.name}</div><div class="muted">${i.qty} · ${left(i.days)}</div></div>${badge(i.days)}</div>
+<div class="actions"><button class="btn btn--ghost" data-act="used" data-id="${i.id}">Markera som använd</button><button class="btn btn--ghost" data-act="del" data-id="${i.id}">Ta bort</button></div></div>`}
+function recipeCard(x){const{r,have,miss,urgent}=x;return`<button class="card" style="text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%" data-act="open" data-id="${r.id}">
+<div class="row"><div class="emoji" aria-hidden="true">${r.e}</div><div class="grow"><div class="name">${r.name}</div><div class="muted">${r.min} min</div></div>${urgent?'<span class="tag tag--save">Rädda maten</span>':''}</div>
+<p style="margin-top:.75rem"><span class="have"><b>Du har hemma:</b> ${have.join(", ")}</span></p>
+${miss.length?`<p><span class="miss"><b>Du saknar:</b> ${miss.join(", ")}</span></p>`:'<p class="have"><b>Du har allt som behövs</b></p>'}</button>`}
+
+function viewScan(){
+const first=sorted().filter(i=>i.days<=3),rec=ranked().slice(0,2);
+return`<div class="brand">${LEAF}<span>Matkollen</span></div>
+<h1>Hej!</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
+<section class="scan"><h2>Skanna en vara</h2><p>Lägg till det du köpt så säger vi till innan det går ut.</p><div><button class="btn btn--onDark" data-act="add">Lägg till vara</button></div></section>
+<h2>Ditt kylskåp</h2><div class="card between"><div><div class="name">${items.length} varor hemma</div><div class="muted">${first.length} behöver användas snart</div></div><button class="link" data-go="fridge">Se alla</button></div>
+<h2>Behöver användas först</h2><div class="stack">${first.length?first.map(i=>`<div class="card row"><div class="emoji" aria-hidden="true">${i.e}</div><div class="grow"><div class="name">${i.name}</div><div class="muted">${left(i.days)}</div></div>${badge(i.days)}</div>`).join(""):'<div class="card muted">Inget behöver användas just nu.</div>'}</div>
+<div class="between"><h2>Recept med dina varor</h2><button class="link" data-go="recipe">Se alla</button></div>
+<div class="stack">${rec.map(recipeCard).join("")}</div>`}
+
+function viewFridge(){
+return`<h1>Kylskåp</h1><p class="muted sub">${items.length} varor hemma</p>
+<button class="btn" data-act="add">Lägg till vara</button>
+${st.adding?`<form class="card form" id="addForm" style="margin-top:.75rem"><label>Namn<input class="input" name="n" required placeholder="Till exempel Gurka"></label>
+<label>Kategori<select class="input" name="c">${CATS.slice(1).map(c=>`<option>${c}</option>`).join("")}</select></label>
+<label>Dagar kvar till bäst före<input class="input" name="d" type="number" min="0" value="5"></label>
+<div class="actions" style="margin-top:0"><button class="btn" type="submit">Spara vara</button><button class="btn btn--ghost" type="button" data-act="cancel">Avbryt</button></div></form>`:""}
+<div style="margin-top:.75rem"><input class="input" id="q" type="search" placeholder="Sök bland dina varor" aria-label="Sök bland dina varor" value="${st.q}"></div>
+<div class="chips" role="group" aria-label="Kategori">${CATS.map(c=>`<button class="chip" data-cat="${c}" aria-pressed="${st.cat===c}">${c}</button>`).join("")}</div>
+<div id="list"></div>`}
+function fridgeList(){
+const q=st.q.toLowerCase(),all=sorted().filter(i=>(st.cat==="Alla"||i.cat===st.cat)&&i.name.toLowerCase().includes(q));
+const urgent=all.filter(i=>i.days<=3),rest=all.filter(i=>i.days>3);
+let h="";
+if(!all.length)h='<div class="card empty"><div class="emoji" aria-hidden="true">🧺</div><p class="name">Inga varor hittades</p><p class="muted">Ändra sökningen eller lägg till en vara.</p></div>';
+if(urgent.length)h+=`<h2>Behöver användas först</h2><div class="stack">${urgent.map(itemCard).join("")}</div>`;
+if(rest.length)h+=`<h2>Övriga varor</h2><div class="stack">${rest.map(itemCard).join("")}</div>`;
+$("#list").innerHTML=h}
+
+function viewRecipes(){
+let list=ranked();if(st.onlyFav)list=list.filter(x=>st.favs.has(x.r.id));
+const soon=list.filter(x=>x.urgent),other=list.filter(x=>!x.urgent);
+return`<h1>Recept med det du har hemma</h1><p class="muted sub">Vi börjar med det som går ut först.</p>
+<div class="chips" role="group" aria-label="Visa"><button class="chip" data-fav="0" aria-pressed="${!st.onlyFav}">Alla förslag</button><button class="chip" data-fav="1" aria-pressed="${st.onlyFav}">Mina favoriter</button></div>
+${!list.length?'<div class="card empty"><div class="emoji" aria-hidden="true">🍽️</div><p class="name">Inga recept matchar just nu</p><p class="muted">Lägg till fler varor eller ändra filtren för att se fler förslag.</p></div>':""}
+${soon.length?`<h2>Rädda maten</h2><div class="stack">${soon.map(recipeCard).join("")}</div>`:""}
+${other.length?`<h2>Fler förslag</h2><div class="stack">${other.map(recipeCard).join("")}</div>`:""}`}
+
+function viewDetail(){
+const r=RECIPES.find(x=>x.id===st.recipe),x=rInfo(r),fav=st.favs.has(r.id);
+return`<button class="link" data-act="back">‹ Tillbaka</button>
+<div class="hero" aria-hidden="true">${r.e}</div>
+<div class="between"><h1>${r.name}</h1><button class="chip" data-act="fav" aria-pressed="${fav}" aria-label="Favorit">${fav?"♥ Favorit":"♡ Spara"}</button></div>
+<p class="muted">Tillagningstid ${r.min} min · ${r.serv} portioner</p>
+<h2>Ingredienser</h2><div class="card stack">${r.ing.map(n=>`<div class="between"><span>${n}</span><span class="${has(n)?"have":"miss"}"><b>${has(n)?"Du har hemma":"Du saknar"}</b></span></div>`).join("")}</div>
+<h2>Steg för steg</h2><div class="card"><ol class="steps">${r.steps.map(s=>`<li>${s}</li>`).join("")}</ol></div>`}
+
+function viewProfile(){
+return`<h1>Profil</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
+<div class="card stack"><div class="between"><span>Namn</span><b>Gäst</b></div><div class="between"><span>Påminnelser om bäst före</span><b>På</b></div><div class="between"><span>Varor hemma</span><b>${items.length}</b></div></div>
+<p class="muted" style="margin-top:1rem">Det här är en demo. Inget sparas när du laddar om sidan.</p>`}
+
+function render(){
+$("#nav").innerHTML=TABS.map(([k,l])=>`<button data-go="${k}" ${st.tab===k?'aria-current="page"':""}>${ICONS[k]}<span>${l}</span></button>`).join("");
+$("#main").innerHTML=st.tab==="recipe"&&st.recipe?viewDetail():{scan:viewScan,fridge:viewFridge,recipe:viewRecipes,profile:viewProfile}[st.tab]();
+if(st.tab==="fridge")fridgeList()}
+function toast(t){const d=document.createElement("div");d.className="toast";d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
+
+document.addEventListener("click",e=>{
+const b=e.target.closest("[data-go],[data-act],[data-cat],[data-fav]");if(!b)return;
+const D=b.dataset,id=+D.id;
+if(D.go){st.tab=D.go;st.recipe=null;st.adding=false;window.scrollTo(0,0)}
+else if(D.cat){st.cat=D.cat}
+else if(D.fav){st.onlyFav=D.fav==="1"}
+else if(D.act==="add"){st.tab="fridge";st.adding=true}
+else if(D.act==="cancel"){st.adding=false}
+else if(D.act==="used"){const i=items.find(x=>x.id===id);items=items.filter(x=>x.id!==id);toast(i.name+" markerad som använd")}
+else if(D.act==="del"){const i=items.find(x=>x.id===id);items=items.filter(x=>x.id!==id);toast(i.name+" borttagen")}
+else if(D.act==="open"){st.recipe=id;window.scrollTo(0,0)}
+else if(D.act==="back"){st.recipe=null}
+else if(D.act==="fav"){st.favs.has(st.recipe)?st.favs.delete(st.recipe):st.favs.add(st.recipe)}
+render()});
+document.addEventListener("input",e=>{if(e.target.id==="q"){st.q=e.target.value;fridgeList()}});
+document.addEventListener("submit",e=>{if(e.target.id!=="addForm")return;e.preventDefault();
+const f=new FormData(e.target),c=f.get("c");
+items.push({id:Date.now(),name:f.get("n").trim(),cat:c,days:Math.max(0,+f.get("d")||0),qty:"1 st",e:EMO[c]});
+st.adding=false;render();toast("Varan är sparad")});
 render();
 </script>
 </body>
