@@ -187,16 +187,22 @@ return`<h1>Profil</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
 <div class="actions"><button class="btn btn--ghost" data-act="delacct" style="color:var(--mk-danger);border-color:var(--mk-danger)">Ta bort mitt konto</button></div>`}
 
 function viewAuth(){
-const m=st.authMode,su=m==="signup";
-const head={signup:"Skapa ditt konto",login:"Logga in",forgot:"Glömt lösenordet?",reset:"Välj nytt lösenord"}[m];
-const intro={forgot:"Skriv in din e-post så skickar vi en länk där du väljer ett nytt lösenord.",reset:"Skriv in ditt nya lösenord."}[m]||"Håll koll på bäst före-datum och ta vara på maten i tid.";
+const m=st.authMode,su=m==="signup",main=m==="signup"||m==="login";
+const head=main?"Använd maten innan den går ut":{forgot:"Glömt lösenordet?",reset:"Välj nytt lösenord"}[m];
+const sub=main?"Matkollen visar vad i kylskåpet som går ut först, påminner dig i tid och föreslår recept på det.":"Mindre matsvinn. Mer matglädje.";
+const feats=main?`<div class="stack" style="margin-bottom:1.25rem">
+<div class="card row"><div class="emoji" aria-hidden="true">⏰</div><div class="grow"><div class="name">Håll koll på bäst före-datum</div><div class="muted">Skanna streckkoden eller skriv in varan. Du ser direkt vad som behöver användas först.</div></div></div>
+<div class="card row"><div class="emoji" aria-hidden="true">🔔</div><div class="grow"><div class="name">Notiser när varor håller på att gå ut</div><div class="muted">Du får en påminnelse i tid, så att du hinner använda maten innan den blir dålig.</div></div></div>
+<div class="card row"><div class="emoji" aria-hidden="true">🍳</div><div class="grow"><div class="name">Recept som räddar maten</div><div class="muted">Appen föreslår recept och sätter varorna som går ut snarast överst, så att inget slängs i onödan.</div></div></div></div>`:"";
+const formHead=main?`<h2 style="margin:0">${su?"Skapa konto":"Logga in"}</h2>`:`<p>${{forgot:"Skriv in din e-post så skickar vi en länk där du väljer ett nytt lösenord.",reset:"Skriv in ditt nya lösenord."}[m]}</p>`;
 const btn={signup:"Skapa konto",login:"Logga in",forgot:"Skicka länk",reset:"Spara nytt lösenord"}[m];
 const links={signup:'<button class="link" data-act="authmode" style="margin-top:.5rem">Har du redan ett konto? Logga in</button>',
 login:'<button class="link" data-act="forgot" style="margin-top:.5rem">Glömt lösenordet?</button><br><button class="link" data-act="authmode">Ny här? Skapa konto</button>',
 forgot:'<button class="link" data-act="tologin" style="margin-top:.5rem">Tillbaka till inloggning</button>',reset:""}[m];
 return`<div style="padding-top:1.5rem"><div class="brand">${LEAF}<span>Matkollen</span></div>
-<h1>${head}</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
-<form class="card form" id="authForm"><p>${intro}</p>
+<h1>${head}</h1><p class="muted sub">${sub}</p>
+${feats}
+<form class="card form" id="authForm">${formHead}
 ${su?'<label>Namn<input class="input" name="n" required autocomplete="given-name" placeholder="Ditt förnamn"></label>':""}
 ${m!=="reset"?'<label>E-post<input class="input" name="e" type="email" required autocomplete="email" placeholder="namn@exempel.se"></label>':""}
 ${m!=="forgot"?`<label>${m==="reset"?"Nytt lösenord":"Lösenord"}<input class="input" name="p" type="password" required minlength="6" autocomplete="${m==="login"?"current-password":"new-password"}" placeholder="Minst 6 tecken"></label>`:""}
@@ -247,6 +253,7 @@ else{const c=f.get("c"),exp=new Date(f.get("d")+"T00:00:00").getTime();
 const ok=await addItem({name:f.get("n").trim(),cat:c,exp,qty:(f.get("q")||"").trim()||"1 st",e:EMO[c]});
 if(ok){st.adding=false;st.prefill=null;render();toast("Varan är sparad")}}});
 
+const appUrl=()=>location.origin+location.pathname.replace(/index\.html$/,"");
 function authErr(er){const m=(er.message||"").toLowerCase();
 if(m.includes("invalid login"))return"Fel e-post eller lösenord.";
 if(m.includes("already registered"))return"Det finns redan ett konto med den e-posten. Logga in istället.";
@@ -265,14 +272,14 @@ say("");btn.disabled=true;
 try{
 if(!sb){say("Inloggningen kunde inte laddas. Kontrollera nätverket.");return}
 if(m==="forgot"){
-const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:appUrl()});
 if(error){say(authErr(error));return}
 say("Om adressen finns hos oss har vi skickat en länk. Kolla din e-post, även skräpposten.",true);return}
 if(m==="reset"){
 const{data,error}=await sb.auth.updateUser({password:pw});
 if(error){say(authErr(error));return}
 setUser(data.user);await loadItems();st.authMode="login";st.tab="scan";window.scrollTo(0,0);render();toast("Ditt nya lösenord är sparat");return}
-const res=m==="signup"?await sb.auth.signUp({email,password:pw,options:{data:{name:(f.get("n")||"").trim()}}}):await sb.auth.signInWithPassword({email,password:pw});
+const res=m==="signup"?await sb.auth.signUp({email,password:pw,options:{data:{name:(f.get("n")||"").trim()},emailRedirectTo:appUrl()}}):await sb.auth.signInWithPassword({email,password:pw});
 if(res.error){say(authErr(res.error));return}
 const u=res.data.session?res.data.session.user:null;
 if(!u){say("Vi har skickat ett mejl till "+email+". Öppna länken i mejlet och logga sedan in.",true);return}
