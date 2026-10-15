@@ -73,7 +73,13 @@ nav svg{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:1.
 <nav id="nav" aria-label="Huvudmeny"></nav>
 <div id="scanBox" class="scanBox" hidden role="dialog" aria-modal="true" aria-label="Skanna vara"><div class="scanIn"><h2 style="margin-top:0">Skanna streckkod</h2><div id="reader"></div><p id="scanMsg" class="muted" style="margin:.75rem 0" role="status"></p><form id="codeForm" class="form"><label>Eller skriv in streckkoden<input class="input" name="c" inputmode="numeric" pattern="[0-9]{8,14}" placeholder="Till exempel 7310865001115"></label><div class="actions" style="margin-top:0"><button class="btn" type="submit">Sök vara</button><button class="btn btn--ghost" type="button" data-act="closescan">Avbryt</button></div></form></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const sb = window.supabase.createClient(
+  "DIN_PROJECT_URL",
+  "DIN_PUBLISHABLE_KEY"
+);
 const ICONS={
 scan:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/></svg>',
 fridge:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M6 10h12M9 6v1.5M9 13v3"/></svg>',
