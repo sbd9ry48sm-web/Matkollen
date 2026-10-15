@@ -73,6 +73,7 @@ nav svg{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:1.
 <nav id="nav" aria-label="Huvudmeny"></nav>
 <div id="scanBox" class="scanBox" hidden role="dialog" aria-modal="true" aria-label="Skanna vara"><div class="scanIn"><h2 style="margin-top:0">Skanna streckkod</h2><div id="reader"></div><p id="scanMsg" class="muted" style="margin:.75rem 0" role="status"></p><form id="codeForm" class="form"><label>Eller skriv in streckkoden<input class="input" name="c" inputmode="numeric" pattern="[0-9]{8,14}" placeholder="Till exempel 7310865001115"></label><div class="actions" style="margin-top:0"><button class="btn" type="submit">Sök vara</button><button class="btn btn--ghost" type="button" data-act="closescan">Avbryt</button></div></form></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 const ICONS={
 scan:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/></svg>',
@@ -100,14 +101,19 @@ const addDays=n=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+n
 const daysLeft=t=>{const m=new Date();m.setHours(0,0,0,0);return Math.round((t-m.getTime())/864e5)};
 const toISO=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const esc=t=>String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let items=load("mk_items",[]);
-let acct=load("mk_acct",null);
+const SB_URL="https://zhhrxrimlpespjmpwqre.supabase.co";
+const SB_KEY="sb_publishable_-JRASwLzorPstnibFrFDWw_wbA-Hpe-";
+const sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
+let items=[];
+let acct=null;
+let userId=null;
+let ready=false;
 const RECIPES=[
 {id:1,name:"Spenatomelett",min:15,e:"🍳",serv:2,ing:["Ägg","Spenat","Ost","Smör"],steps:["Vispa äggen med en nypa salt.","Fräs spenaten i smör tills den faller ihop.","Häll över äggen och strö på riven ost.","Stek på medelvärme tills omeletten stelnat och vik ihop."]},
 {id:2,name:"Krämig kycklinggryta",min:35,e:"🍲",serv:4,ing:["Kycklingfilé","Paprika","Grädde","Ris"],steps:["Skär kycklingen och paprikan i bitar.","Bryn kycklingen och fräs paprikan med.","Tillsätt grädde och låt sjuda i 10 minuter.","Servera med kokt ris."]},
 {id:3,name:"Morotssoppa",min:40,e:"🥕",serv:4,ing:["Morot","Grädde","Lök"],steps:["Fräs hackad lök mjuk.","Tillsätt morötter och vatten, koka tills de är mjuka.","Mixa slätt och rör i grädden.","Smaksätt med salt och peppar."]},
 {id:4,name:"Yoghurtpannkakor",min:20,e:"🥞",serv:3,ing:["Ägg","Mjölk","Yoghurt","Vetemjöl"],steps:["Rör ihop ägg, mjölk, yoghurt och mjöl till en slät smet.","Låt smeten vila några minuter.","Stek små pannkakor i smör på medelvärme."]}];
-let st={tab:"scan",cat:"Alla",q:"",adding:false,recipe:null,favs:new Set(),onlyFav:false};
+let st={tab:"scan",cat:"Alla",q:"",adding:false,recipe:null,favs:new Set(),onlyFav:false,authMode:"signup"};
 const $=s=>document.querySelector(s);
 const status=d=>d<=0?["urgent","Behöver användas idag"]:d<=3?["soon","Använd snart"]:["good","Bra"];
 const badge=d=>{const[k,t]=status(d);return`<span class="status s-${k}">${t}</span>`};
@@ -117,7 +123,7 @@ const has=n=>items.find(i=>i.name.toLowerCase()===n.toLowerCase());
 function rInfo(r){const have=[],miss=[];let urgent=false;r.ing.forEach(n=>{const it=has(n);if(it){have.push(n);if(it.days<=3)urgent=true}else miss.push(n)});return{have,miss,urgent,score:(urgent?100:0)+have.length*5-miss.length}}
 const ranked=()=>RECIPES.map(r=>({r,...rInfo(r)})).filter(x=>x.have.length).sort((a,b)=>b.score-a.score);
 
-function itemCard(i){return`<div class="card"><div class="row"><div class="emoji" aria-hidden="true">${i.e}</div><div class="grow"><div class="name">${i.name}</div><div class="muted">${i.qty} · ${left(i.days)}</div></div>${badge(i.days)}</div>
+function itemCard(i){return`<div class="card"><div class="row"><div class="emoji" aria-hidden="true">${i.e}</div><div class="grow"><div class="name">${esc(i.name)}</div><div class="muted">${esc(i.qty)} · ${left(i.days)}</div></div>${badge(i.days)}</div>
 <div class="actions"><button class="btn btn--ghost" data-act="used" data-id="${i.id}">Markera som använd</button><button class="btn btn--ghost" data-act="del" data-id="${i.id}">Ta bort</button></div></div>`}
 function recipeCard(x){const{r,have,miss,urgent}=x;return`<button class="card" style="text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%" data-act="open" data-id="${r.id}">
 <div class="row"><div class="emoji" aria-hidden="true">${r.e}</div><div class="grow"><div class="name">${r.name}</div><div class="muted">${r.min} min</div></div>${urgent?'<span class="tag tag--save">Rädda maten</span>':''}</div>
@@ -130,7 +136,7 @@ return`<div class="brand">${LEAF}<span>Matkollen</span></div>
 <h1>Hej${acct?", "+esc(acct.name):""}!</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
 <section class="scan"><h2>Skanna en vara</h2><p>Rikta kameran mot streckkoden så lägger vi in varan i kylskåpet.</p><div class="actions" style="margin-top:0"><button class="btn btn--onDark" data-act="scan">Skanna streckkod</button><button class="btn btn--onDark" data-act="add">Lägg till vara</button></div></section>
 <h2>Ditt kylskåp</h2><div class="card between"><div><div class="name">${items.length} varor hemma</div><div class="muted">${first.length} behöver användas snart</div></div><button class="link" data-go="fridge">Se alla</button></div>
-<h2>Behöver användas först</h2><div class="stack">${first.length?first.map(i=>`<div class="card row"><div class="emoji" aria-hidden="true">${i.e}</div><div class="grow"><div class="name">${i.name}</div><div class="muted">${left(i.days)}</div></div>${badge(i.days)}</div>`).join(""):'<div class="card muted">Inget behöver användas just nu.</div>'}</div>
+<h2>Behöver användas först</h2><div class="stack">${first.length?first.map(i=>`<div class="card row"><div class="emoji" aria-hidden="true">${i.e}</div><div class="grow"><div class="name">${esc(i.name)}</div><div class="muted">${left(i.days)}</div></div>${badge(i.days)}</div>`).join(""):'<div class="card muted">Inget behöver användas just nu.</div>'}</div>
 <div class="between"><h2>Recept med dina varor</h2><button class="link" data-go="recipe">Se alla</button></div>
 ${rec.length?`<div class="stack">${rec.map(recipeCard).join("")}</div>`:'<div class="card muted">Lägg in några varor så dyker receptförslag upp här.</div>'}`}
 
@@ -175,53 +181,91 @@ return`<button class="link" data-act="back">‹ Tillbaka</button>
 function viewProfile(){
 return`<h1>Profil</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
 <div class="card stack"><div class="between"><span>Namn</span><b>${esc(acct&&acct.name)}</b></div>${acct&&acct.email?`<div class="between"><span>E-post</span><b>${esc(acct.email)}</b></div>`:""}<div class="between"><span>Varor hemma</span><b>${items.length}</b></div></div>
-<p class="muted" style="margin:1rem 0">Kontot och dina varor sparas bara på den här enheten.</p>
-<button class="btn btn--ghost" data-act="reset">Ta bort konto och data</button>`}
+<p class="muted" style="margin:1rem 0">Dina varor sparas på ditt konto, så de följer med om du loggar in på en annan enhet.</p>
+<div class="actions"><button class="btn" data-act="logout">Logga ut</button><button class="btn btn--ghost" data-act="reset">Ta bort alla mina varor</button></div>`}
 
 function viewAuth(){
+const su=st.authMode==="signup";
 return`<div style="padding-top:1.5rem"><div class="brand">${LEAF}<span>Matkollen</span></div>
-<h1>Välkommen till Matkollen</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
+<h1>${su?"Skapa ditt konto":"Logga in"}</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
 <form class="card form" id="authForm"><p>Håll koll på bäst före-datum och ta vara på maten i tid.</p>
-<label>Namn<input class="input" name="n" required autocomplete="given-name" placeholder="Ditt förnamn"></label>
-<label>E-post (valfritt)<input class="input" name="e" type="email" autocomplete="email" placeholder="namn@exempel.se"></label>
-<button class="btn" type="submit">Skapa konto</button></form>
-<p class="muted" style="margin-top:1rem">Kontot sparas på den här enheten.</p></div>`}
+${su?'<label>Namn<input class="input" name="n" required autocomplete="given-name" placeholder="Ditt förnamn"></label>':""}
+<label>E-post<input class="input" name="e" type="email" required autocomplete="email" placeholder="namn@exempel.se"></label>
+<label>Lösenord<input class="input" name="p" type="password" required minlength="6" autocomplete="${su?"new-password":"current-password"}" placeholder="Minst 6 tecken"></label>
+<p id="authMsg" class="miss" role="alert"></p>
+<button class="btn" type="submit">${su?"Skapa konto":"Logga in"}</button></form>
+<button class="link" data-act="authmode" style="margin-top:.5rem">${su?"Har du redan ett konto? Logga in":"Ny här? Skapa konto"}</button></div>`}
 
 function render(){
-items.forEach(i=>{if(i.exp)i.days=daysLeft(i.exp)});store("mk_items",items);
+items.forEach(i=>{if(i.exp)i.days=daysLeft(i.exp)});
+if(!ready){$("#nav").innerHTML="";$("#main").innerHTML='<p class="muted" style="padding-top:3rem;text-align:center" role="status">Laddar…</p>';return}
 if(!acct){$("#nav").innerHTML="";$("#main").innerHTML=viewAuth();return}
 $("#nav").innerHTML=TABS.map(([k,l])=>`<button data-go="${k}" ${st.tab===k?'aria-current="page"':""}>${ICONS[k]}<span>${l}</span></button>`).join("");
 $("#main").innerHTML=st.tab==="recipe"&&st.recipe?viewDetail():{scan:viewScan,fridge:viewFridge,recipe:viewRecipes,profile:viewProfile}[st.tab]();
 if(st.tab==="fridge")fridgeList()}
 function toast(t){const d=document.createElement("div");d.className="toast";d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
 
-document.addEventListener("click",e=>{
+document.addEventListener("click",async e=>{
 const b=e.target.closest("[data-go],[data-act],[data-cat],[data-fav]");if(!b)return;
-const D=b.dataset,id=+D.id;
+const D=b.dataset,id=D.id;
 if(D.go){st.tab=D.go;st.recipe=null;st.adding=false;window.scrollTo(0,0)}
 else if(D.cat){st.cat=D.cat}
 else if(D.fav){st.onlyFav=D.fav==="1"}
 else if(D.act==="add"){st.tab="fridge";st.adding=true;st.prefill=null}
 else if(D.act==="scan"){openScan();return}
 else if(D.act==="closescan"){closeScan();return}
-else if(D.act==="demo"){items=DEMO.map(d=>({...d,id:Date.now()+d.id,exp:addDays(d.days)}))}
-else if(D.act==="reset"){if(!confirm("Ta bort kontot och alla varor från den här enheten?"))return;acct=null;items=[];st.tab="scan";try{localStorage.removeItem("mk_acct");localStorage.removeItem("mk_items")}catch(x){}}
+else if(D.act==="demo"){await addDemo()}
+else if(D.act==="reset"){if(!confirm("Ta bort alla dina varor?"))return;await deleteAll()}
+else if(D.act==="logout"){try{await sb.auth.signOut()}catch(x){}setUser(null);items=[];st.tab="scan";window.scrollTo(0,0)}
+else if(D.act==="authmode"){st.authMode=st.authMode==="signup"?"login":"signup"}
 else if(D.act==="cancel"){st.adding=false;st.prefill=null}
-else if(D.act==="used"){const i=items.find(x=>x.id===id);items=items.filter(x=>x.id!==id);toast(i.name+" markerad som använd")}
-else if(D.act==="del"){const i=items.find(x=>x.id===id);items=items.filter(x=>x.id!==id);toast(i.name+" borttagen")}
-else if(D.act==="open"){st.recipe=id;window.scrollTo(0,0)}
+else if(D.act==="used"){const i=items.find(x=>x.id===id);if(i&&await removeItem(id))toast(i.name+" markerad som använd")}
+else if(D.act==="del"){const i=items.find(x=>x.id===id);if(i&&await removeItem(id))toast(i.name+" borttagen")}
+else if(D.act==="open"){st.recipe=+id;window.scrollTo(0,0)}
 else if(D.act==="back"){st.recipe=null}
 else if(D.act==="fav"){st.favs.has(st.recipe)?st.favs.delete(st.recipe):st.favs.add(st.recipe)}
 render()});
 document.addEventListener("input",e=>{if(e.target.id==="q"){st.q=e.target.value;fridgeList()}});
-document.addEventListener("submit",e=>{
+document.addEventListener("submit",async e=>{
 const id=e.target.id;if(!["addForm","authForm","codeForm"].includes(id))return;e.preventDefault();
 const f=new FormData(e.target);
-if(id==="authForm"){acct={name:f.get("n").trim(),email:(f.get("e")||"").trim()};store("mk_acct",acct);st.tab="scan";window.scrollTo(0,0);render()}
+if(id==="authForm"){await doAuth(e.target,f)}
 else if(id==="codeForm"){onCode(f.get("c").trim())}
 else{const c=f.get("c"),exp=new Date(f.get("d")+"T00:00:00").getTime();
-items.push({id:Date.now(),name:f.get("n").trim(),cat:c,exp,days:daysLeft(exp),qty:(f.get("q")||"").trim()||"1 st",e:EMO[c]});
-st.adding=false;st.prefill=null;render();toast("Varan är sparad")}});
+const ok=await addItem({name:f.get("n").trim(),cat:c,exp,qty:(f.get("q")||"").trim()||"1 st",e:EMO[c]});
+if(ok){st.adding=false;st.prefill=null;render();toast("Varan är sparad")}}});
+
+function authErr(er){const m=(er.message||"").toLowerCase();
+if(m.includes("invalid login"))return"Fel e-post eller lösenord.";
+if(m.includes("already registered"))return"Det finns redan ett konto med den e-posten. Logga in istället.";
+if(m.includes("at least"))return"Lösenordet måste vara minst 6 tecken.";
+if(m.includes("not confirmed"))return"Bekräfta din e-post först. Öppna länken i mejlet vi skickade.";
+if(m.includes("rate limit"))return"För många försök. Vänta en stund och försök igen.";
+if(m.includes("invalid"))return"Kontrollera e-postadressen.";
+return"Något gick fel: "+er.message}
+async function doAuth(form,f){
+const msg=$("#authMsg"),btn=form.querySelector("button[type=submit]");
+const email=f.get("e").trim(),pw=f.get("p"),su=st.authMode==="signup";
+const say=(t,ok)=>{msg.textContent=t;msg.className=ok?"have":"miss"};
+say("");btn.disabled=true;
+try{
+if(!sb){say("Inloggningen kunde inte laddas. Kontrollera nätverket.");return}
+const res=su?await sb.auth.signUp({email,password:pw,options:{data:{name:(f.get("n")||"").trim()}}}):await sb.auth.signInWithPassword({email,password:pw});
+if(res.error){say(authErr(res.error));return}
+const u=res.data.session?res.data.session.user:null;
+if(!u){say("Vi har skickat ett mejl till "+email+". Öppna länken i mejlet och logga sedan in.",true);return}
+setUser(u);await loadItems();st.tab="scan";window.scrollTo(0,0);render()
+}catch(x){say("Något gick fel. Kontrollera nätverket och försök igen.")}
+finally{btn.disabled=false}}
+
+// Databas
+const fromRow=r=>({id:r.id,name:r.name,cat:r.cat,qty:r.qty||"1 st",e:r.e||EMO[r.cat]||"🥫",exp:Number(r.exp),days:daysLeft(Number(r.exp))});
+function setUser(u){userId=u?u.id:null;acct=u?{name:(u.user_metadata&&u.user_metadata.name)||"",email:u.email||""}:null}
+async function loadItems(){const{data,error}=await sb.from("items").select("*").order("exp");if(error){toast("Kunde inte hämta dina varor.");return}items=data.map(fromRow)}
+async function addItem(o){const{data,error}=await sb.from("items").insert(o).select().single();if(error){toast("Kunde inte spara varan. Försök igen.");return false}items.push(fromRow(data));return true}
+async function removeItem(id){const{error}=await sb.from("items").delete().eq("id",id);if(error){toast("Något gick fel. Försök igen.");return false}items=items.filter(x=>x.id!==id);return true}
+async function deleteAll(){const{error}=await sb.from("items").delete().eq("user_id",userId);if(error){toast("Något gick fel. Försök igen.");return}items=[];toast("Alla varor är borttagna")}
+async function addDemo(){const rows=DEMO.map(d=>({name:d.name,cat:d.cat,qty:d.qty,e:d.e,exp:addDays(d.days)}));const{data,error}=await sb.from("items").insert(rows).select();if(error){toast("Något gick fel. Försök igen.");return}items=items.concat(data.map(fromRow))}
 
 let scanner=null,busy=false;
 async function stopCam(){if(scanner){try{await scanner.stop();scanner.clear()}catch(x){}scanner=null}}
@@ -253,7 +297,12 @@ await closeScan();
 st.tab="fridge";st.adding=true;st.prefill=p||{};
 render();window.scrollTo(0,0);
 toast(p&&p.name?"Hittade varan. Fyll i bäst före-datum.":"Hittade inte varan. Skriv in namnet själv.")}
-render();
+(async()=>{
+if(!sb){ready=true;render();toast("Kunde inte ladda inloggningen. Kontrollera nätverket.");return}
+try{const{data}=await sb.auth.getSession();if(data.session){setUser(data.session.user);await loadItems()}}catch(x){}
+ready=true;render();
+sb.auth.onAuthStateChange(ev=>{if(ev==="SIGNED_OUT"){setUser(null);items=[];render()}});
+})();
 </script>
 </body>
 </html>
