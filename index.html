@@ -63,12 +63,15 @@ nav button{display:flex;flex-direction:column;align-items:center;justify-content
 nav button[aria-current=page]{background:var(--mk-cream);color:var(--mk-forest);font-weight:700}
 nav svg{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .toast{position:fixed;left:50%;bottom:5.5rem;transform:translateX(-50%);background:var(--mk-ink);color:#fff;padding:.75rem 1rem;border-radius:var(--r-md);font-size:.9375rem;max-width:90%}
+.scanBox{position:fixed;inset:0;z-index:20;background:var(--mk-cream);overflow:auto;padding:calc(1.25rem + env(safe-area-inset-top,0px)) 1rem 2rem}.scanBox[hidden]{display:none}.scanIn{max-width:760px;margin:0 auto}#reader{border-radius:var(--r-lg);overflow:hidden;background:#1d2a23;min-height:11rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
 <div id="app"><main id="main"></main></div>
 <nav id="nav" aria-label="Huvudmeny"></nav>
+<div id="scanBox" class="scanBox" hidden role="dialog" aria-modal="true" aria-label="Skanna vara"><div class="scanIn"><h2 style="margin-top:0">Skanna streckkod</h2><div id="reader"></div><p id="scanMsg" class="muted" style="margin:.75rem 0" role="status"></p><form id="codeForm" class="form"><label>Eller skriv in streckkoden<input class="input" name="c" inputmode="numeric" pattern="[0-9]{8,14}" placeholder="Till exempel 7310865001115"></label><div class="actions" style="margin-top:0"><button class="btn" type="submit">Sök vara</button><button class="btn btn--ghost" type="button" data-act="closescan">Avbryt</button></div></form></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <script>
 const ICONS={
 scan:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/></svg>',
@@ -80,7 +83,7 @@ const TABS=[["scan","Skanna"],["fridge","Kylskåp"],["recipe","Recept"],["profil
 const CATS=["Alla","Grönsaker","Mejeri","Kött","Annat"];
 const EMO={Grönsaker:"🥬",Mejeri:"🥛",Kött:"🍗",Annat:"🥫"};
 
-let items=[
+const DEMO=[
 {id:1,name:"Spenat",cat:"Grönsaker",days:0,qty:"1 påse",e:"🥬"},
 {id:2,name:"Mjölk",cat:"Mejeri",days:1,qty:"1 liter",e:"🥛"},
 {id:3,name:"Kycklingfilé",cat:"Kött",days:2,qty:"500 g",e:"🍗"},
@@ -90,6 +93,14 @@ let items=[
 {id:7,name:"Ägg",cat:"Mejeri",days:9,qty:"10 st",e:"🥚"},
 {id:8,name:"Morot",cat:"Grönsaker",days:12,qty:"1 kg",e:"🥕"},
 {id:9,name:"Ost",cat:"Mejeri",days:14,qty:"400 g",e:"🧀"}];
+const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const addDays=n=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+n);return d.getTime()};
+const daysLeft=t=>{const m=new Date();m.setHours(0,0,0,0);return Math.round((t-m.getTime())/864e5)};
+const toISO=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const esc=t=>String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let items=load("mk_items",[]);
+let acct=load("mk_acct",null);
 const RECIPES=[
 {id:1,name:"Spenatomelett",min:15,e:"🍳",serv:2,ing:["Ägg","Spenat","Ost","Smör"],steps:["Vispa äggen med en nypa salt.","Fräs spenaten i smör tills den faller ihop.","Häll över äggen och strö på riven ost.","Stek på medelvärme tills omeletten stelnat och vik ihop."]},
 {id:2,name:"Krämig kycklinggryta",min:35,e:"🍲",serv:4,ing:["Kycklingfilé","Paprika","Grädde","Ris"],steps:["Skär kycklingen och paprikan i bitar.","Bryn kycklingen och fräs paprikan med.","Tillsätt grädde och låt sjuda i 10 minuter.","Servera med kokt ris."]},
@@ -99,7 +110,7 @@ let st={tab:"scan",cat:"Alla",q:"",adding:false,recipe:null,favs:new Set(),onlyF
 const $=s=>document.querySelector(s);
 const status=d=>d<=0?["urgent","Behöver användas idag"]:d<=3?["soon","Använd snart"]:["good","Bra"];
 const badge=d=>{const[k,t]=status(d);return`<span class="status s-${k}">${t}</span>`};
-const left=d=>d<=0?"Går ut idag":d===1?"1 dag kvar":d+" dagar kvar";
+const left=d=>d<0?"Utgången för "+(-d)+(d===-1?" dag":" dagar")+" sedan":d===0?"Går ut idag":d===1?"1 dag kvar":d+" dagar kvar";
 const sorted=()=>[...items].sort((a,b)=>a.days-b.days);
 const has=n=>items.find(i=>i.name.toLowerCase()===n.toLowerCase());
 function rInfo(r){const have=[],miss=[];let urgent=false;r.ing.forEach(n=>{const it=has(n);if(it){have.push(n);if(it.days<=3)urgent=true}else miss.push(n)});return{have,miss,urgent,score:(urgent?100:0)+have.length*5-miss.length}}
@@ -115,19 +126,20 @@ ${miss.length?`<p><span class="miss"><b>Du saknar:</b> ${miss.join(", ")}</span>
 function viewScan(){
 const first=sorted().filter(i=>i.days<=3),rec=ranked().slice(0,2);
 return`<div class="brand">${LEAF}<span>Matkollen</span></div>
-<h1>Hej!</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
-<section class="scan"><h2>Skanna en vara</h2><p>Lägg till det du köpt så säger vi till innan det går ut.</p><div><button class="btn btn--onDark" data-act="add">Lägg till vara</button></div></section>
+<h1>Hej${acct?", "+esc(acct.name):""}!</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
+<section class="scan"><h2>Skanna en vara</h2><p>Rikta kameran mot streckkoden så lägger vi in varan i kylskåpet.</p><div class="actions" style="margin-top:0"><button class="btn btn--onDark" data-act="scan">Skanna streckkod</button><button class="btn btn--onDark" data-act="add">Lägg till vara</button></div></section>
 <h2>Ditt kylskåp</h2><div class="card between"><div><div class="name">${items.length} varor hemma</div><div class="muted">${first.length} behöver användas snart</div></div><button class="link" data-go="fridge">Se alla</button></div>
 <h2>Behöver användas först</h2><div class="stack">${first.length?first.map(i=>`<div class="card row"><div class="emoji" aria-hidden="true">${i.e}</div><div class="grow"><div class="name">${i.name}</div><div class="muted">${left(i.days)}</div></div>${badge(i.days)}</div>`).join(""):'<div class="card muted">Inget behöver användas just nu.</div>'}</div>
 <div class="between"><h2>Recept med dina varor</h2><button class="link" data-go="recipe">Se alla</button></div>
-<div class="stack">${rec.map(recipeCard).join("")}</div>`}
+${rec.length?`<div class="stack">${rec.map(recipeCard).join("")}</div>`:'<div class="card muted">Lägg in några varor så dyker receptförslag upp här.</div>'}`}
 
 function viewFridge(){
 return`<h1>Kylskåp</h1><p class="muted sub">${items.length} varor hemma</p>
-<button class="btn" data-act="add">Lägg till vara</button>
-${st.adding?`<form class="card form" id="addForm" style="margin-top:.75rem"><label>Namn<input class="input" name="n" required placeholder="Till exempel Gurka"></label>
-<label>Kategori<select class="input" name="c">${CATS.slice(1).map(c=>`<option>${c}</option>`).join("")}</select></label>
-<label>Dagar kvar till bäst före<input class="input" name="d" type="number" min="0" value="5"></label>
+<div class="actions" style="margin-top:0"><button class="btn" data-act="scan">Skanna vara</button><button class="btn btn--ghost" data-act="add">Lägg till vara</button></div>
+${st.adding?`<form class="card form" id="addForm" style="margin-top:.75rem"><label>Namn<input class="input" name="n" required placeholder="Till exempel Gurka" value="${esc((st.prefill||{}).name)}"></label>
+<label>Kategori<select class="input" name="c">${CATS.slice(1).map(c=>`<option${c===(st.prefill||{}).cat?" selected":""}>${c}</option>`).join("")}</select></label>
+<label>Bäst före-datum<input class="input" name="d" type="date" required value="${toISO(addDays(5))}"></label>
+<label>Mängd (valfritt)<input class="input" name="q" placeholder="Till exempel 500 g" value="${esc((st.prefill||{}).qty)}"></label>
 <div class="actions" style="margin-top:0"><button class="btn" type="submit">Spara vara</button><button class="btn btn--ghost" type="button" data-act="cancel">Avbryt</button></div></form>`:""}
 <div style="margin-top:.75rem"><input class="input" id="q" type="search" placeholder="Sök bland dina varor" aria-label="Sök bland dina varor" value="${st.q}"></div>
 <div class="chips" role="group" aria-label="Kategori">${CATS.map(c=>`<button class="chip" data-cat="${c}" aria-pressed="${st.cat===c}">${c}</button>`).join("")}</div>
@@ -136,7 +148,7 @@ function fridgeList(){
 const q=st.q.toLowerCase(),all=sorted().filter(i=>(st.cat==="Alla"||i.cat===st.cat)&&i.name.toLowerCase().includes(q));
 const urgent=all.filter(i=>i.days<=3),rest=all.filter(i=>i.days>3);
 let h="";
-if(!all.length)h='<div class="card empty"><div class="emoji" aria-hidden="true">🧺</div><p class="name">Inga varor hittades</p><p class="muted">Ändra sökningen eller lägg till en vara.</p></div>';
+if(!all.length)h=items.length?'<div class="card empty"><div class="emoji" aria-hidden="true">🧺</div><p class="name">Inga varor hittades</p><p class="muted">Ändra sökningen eller lägg till en vara.</p></div>':'<div class="card empty"><div class="emoji" aria-hidden="true">🧺</div><p class="name">Kylskåpet är tomt</p><p class="muted">Skanna en vara eller lägg in den själv.</p><button class="btn btn--ghost" data-act="demo">Prova med exempelvaror</button></div>';
 if(urgent.length)h+=`<h2>Behöver användas först</h2><div class="stack">${urgent.map(itemCard).join("")}</div>`;
 if(rest.length)h+=`<h2>Övriga varor</h2><div class="stack">${rest.map(itemCard).join("")}</div>`;
 $("#list").innerHTML=h}
@@ -161,10 +173,22 @@ return`<button class="link" data-act="back">‹ Tillbaka</button>
 
 function viewProfile(){
 return`<h1>Profil</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
-<div class="card stack"><div class="between"><span>Namn</span><b>Gäst</b></div><div class="between"><span>Påminnelser om bäst före</span><b>På</b></div><div class="between"><span>Varor hemma</span><b>${items.length}</b></div></div>
-<p class="muted" style="margin-top:1rem">Det här är en demo. Inget sparas när du laddar om sidan.</p>`}
+<div class="card stack"><div class="between"><span>Namn</span><b>${esc(acct&&acct.name)}</b></div>${acct&&acct.email?`<div class="between"><span>E-post</span><b>${esc(acct.email)}</b></div>`:""}<div class="between"><span>Varor hemma</span><b>${items.length}</b></div></div>
+<p class="muted" style="margin:1rem 0">Kontot och dina varor sparas bara på den här enheten.</p>
+<button class="btn btn--ghost" data-act="reset">Ta bort konto och data</button>`}
+
+function viewAuth(){
+return`<div style="padding-top:1.5rem"><div class="brand">${LEAF}<span>Matkollen</span></div>
+<h1>Välkommen till Matkollen</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
+<form class="card form" id="authForm"><p>Håll koll på bäst före-datum och ta vara på maten i tid.</p>
+<label>Namn<input class="input" name="n" required autocomplete="given-name" placeholder="Ditt förnamn"></label>
+<label>E-post (valfritt)<input class="input" name="e" type="email" autocomplete="email" placeholder="namn@exempel.se"></label>
+<button class="btn" type="submit">Skapa konto</button></form>
+<p class="muted" style="margin-top:1rem">Kontot sparas på den här enheten.</p></div>`}
 
 function render(){
+items.forEach(i=>{if(i.exp)i.days=daysLeft(i.exp)});store("mk_items",items);
+if(!acct){$("#nav").innerHTML="";$("#main").innerHTML=viewAuth();return}
 $("#nav").innerHTML=TABS.map(([k,l])=>`<button data-go="${k}" ${st.tab===k?'aria-current="page"':""}>${ICONS[k]}<span>${l}</span></button>`).join("");
 $("#main").innerHTML=st.tab==="recipe"&&st.recipe?viewDetail():{scan:viewScan,fridge:viewFridge,recipe:viewRecipes,profile:viewProfile}[st.tab]();
 if(st.tab==="fridge")fridgeList()}
@@ -176,8 +200,12 @@ const D=b.dataset,id=+D.id;
 if(D.go){st.tab=D.go;st.recipe=null;st.adding=false;window.scrollTo(0,0)}
 else if(D.cat){st.cat=D.cat}
 else if(D.fav){st.onlyFav=D.fav==="1"}
-else if(D.act==="add"){st.tab="fridge";st.adding=true}
-else if(D.act==="cancel"){st.adding=false}
+else if(D.act==="add"){st.tab="fridge";st.adding=true;st.prefill=null}
+else if(D.act==="scan"){openScan();return}
+else if(D.act==="closescan"){closeScan();return}
+else if(D.act==="demo"){items=DEMO.map(d=>({...d,id:Date.now()+d.id,exp:addDays(d.days)}))}
+else if(D.act==="reset"){if(!confirm("Ta bort kontot och alla varor från den här enheten?"))return;acct=null;items=[];st.tab="scan";try{localStorage.removeItem("mk_acct");localStorage.removeItem("mk_items")}catch(x){}}
+else if(D.act==="cancel"){st.adding=false;st.prefill=null}
 else if(D.act==="used"){const i=items.find(x=>x.id===id);items=items.filter(x=>x.id!==id);toast(i.name+" markerad som använd")}
 else if(D.act==="del"){const i=items.find(x=>x.id===id);items=items.filter(x=>x.id!==id);toast(i.name+" borttagen")}
 else if(D.act==="open"){st.recipe=id;window.scrollTo(0,0)}
@@ -185,10 +213,45 @@ else if(D.act==="back"){st.recipe=null}
 else if(D.act==="fav"){st.favs.has(st.recipe)?st.favs.delete(st.recipe):st.favs.add(st.recipe)}
 render()});
 document.addEventListener("input",e=>{if(e.target.id==="q"){st.q=e.target.value;fridgeList()}});
-document.addEventListener("submit",e=>{if(e.target.id!=="addForm")return;e.preventDefault();
-const f=new FormData(e.target),c=f.get("c");
-items.push({id:Date.now(),name:f.get("n").trim(),cat:c,days:Math.max(0,+f.get("d")||0),qty:"1 st",e:EMO[c]});
-st.adding=false;render();toast("Varan är sparad")});
+document.addEventListener("submit",e=>{
+const id=e.target.id;if(!["addForm","authForm","codeForm"].includes(id))return;e.preventDefault();
+const f=new FormData(e.target);
+if(id==="authForm"){acct={name:f.get("n").trim(),email:(f.get("e")||"").trim()};store("mk_acct",acct);st.tab="scan";window.scrollTo(0,0);render()}
+else if(id==="codeForm"){onCode(f.get("c").trim())}
+else{const c=f.get("c"),exp=new Date(f.get("d")+"T00:00:00").getTime();
+items.push({id:Date.now(),name:f.get("n").trim(),cat:c,exp,days:daysLeft(exp),qty:(f.get("q")||"").trim()||"1 st",e:EMO[c]});
+st.adding=false;st.prefill=null;render();toast("Varan är sparad")}});
+
+let scanner=null,busy=false;
+async function stopCam(){if(scanner){try{await scanner.stop();scanner.clear()}catch(x){}scanner=null}}
+async function openScan(){
+busy=false;$("#scanBox").hidden=false;$("#reader").style.display="";
+$("#scanMsg").textContent="Rikta kameran mot streckkoden på varan.";
+try{
+const F=Html5QrcodeSupportedFormats;
+scanner=new Html5Qrcode("reader",{formatsToSupport:[F.EAN_13,F.EAN_8,F.UPC_A,F.UPC_E],verbose:false});
+await scanner.start({facingMode:"environment"},{fps:10,qrbox:{width:260,height:140}},c=>onCode(c),()=>{});
+}catch(err){$("#reader").style.display="none";$("#scanMsg").textContent="Kameran kunde inte startas. Tillåt kamera för sidan i webbläsaren, eller skriv in streckkoden här under."}}
+async function closeScan(){await stopCam();$("#scanBox").hidden=true}
+function guess(tags){const t=tags.join(" ");
+if(/dair|milk|chees|yogh|yogu|cream|butter|egg/.test(t))return"Mejeri";
+if(/meat|poultry|chicken|beef|pork|sausage|fish/.test(t))return"Kött";
+if(/vegetable|fruit|salad|plant-based-foods/.test(t))return"Grönsaker";
+return"Annat"}
+async function lookup(code){
+try{const r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+"?fields=product_name,product_name_sv,categories_tags,quantity");
+const j=await r.json();
+if(j.status===1&&j.product){const p=j.product;return{name:(p.product_name_sv||p.product_name||"").trim(),cat:guess(p.categories_tags||[]),qty:p.quantity||""}}}catch(x){}
+return null}
+async function onCode(code){
+if(busy)return;busy=true;
+$("#scanMsg").textContent="Letar efter varan…";
+await stopCam();
+const p=await lookup(code);
+await closeScan();
+st.tab="fridge";st.adding=true;st.prefill=p||{};
+render();window.scrollTo(0,0);
+toast(p&&p.name?"Hittade varan. Fyll i bäst före-datum.":"Hittade inte varan. Skriv in namnet själv.")}
 render();
 </script>
 </body>
