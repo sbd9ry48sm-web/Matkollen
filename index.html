@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matkollen</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' aria-hidden='true'%3E%3Crect rx='9' fill='%23245B45'/%3E%3Cpath d='M16 25V15' stroke='%23F3F6EC' stroke-width='2' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 18c-5.5 0-8.5-3-8.5-7.5C13 10.5 16 13 16 18z' fill='%238EBB91'/%3E%3Cpath d='M16 15.5c0-5.5 3.5-9 9-9 0 5.5-3.5 9-9 9z' fill='%23F3F6EC'/%3E%3C/svg%3E">
 <style>
 :root{--mk-forest:#245B45;--mk-sage:#8EBB91;--mk-cream:#F3F6EC;--mk-white:#fff;--mk-ink:#25332B;--mk-muted:#59675E;--mk-border:#D8E0D4;--mk-warning:#D97732;--mk-danger:#B94040;
 --r-md:.875rem;--r-lg:1.25rem;--shadow:0 4px 16px rgb(36 91 69/8%);--focus:0 0 0 3px rgb(142 187 145/55%);
@@ -18,7 +19,7 @@ h2{font-size:1.125rem;margin:1.75rem 0 .75rem}
 p{margin:0}
 .muted{color:var(--mk-muted)}
 .sub{margin-bottom:1.25rem}
-.brand{display:flex;align-items:center;gap:.5rem;color:var(--mk-forest);font-weight:750;margin-bottom:1rem}
+.brand{display:flex;align-items:center;gap:.625rem;color:var(--mk-forest);font-weight:750;font-size:1.25rem;letter-spacing:-.01em;margin-bottom:1rem}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.75rem;padding:.75rem 1.125rem;border:1px solid transparent;border-radius:var(--r-md);background:var(--mk-forest);color:#fff;font:inherit;font-weight:650;cursor:pointer}
 .btn:hover{background:#1C4938}
 .btn:active{transform:translateY(1px)}
@@ -78,7 +79,7 @@ scan:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h
 fridge:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M6 10h12M9 6v1.5M9 13v3"/></svg>',
 recipe:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-2-1.5-5-1.5-8-1v14c3-.5 6-.5 8 1 2-1.5 5-1.5 8-1V4c-3-.5-6-.5-8 1zM12 5v14"/></svg>',
 profile:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg>'};
-const LEAF='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#245B45" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14zM5 19c3-4 6-7 10-9"/></svg>';
+const LEAF='<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#245B45"/><path d="M16 25V15" stroke="#F3F6EC" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M16 18c-5.5 0-8.5-3-8.5-7.5C13 10.5 16 13 16 18z" fill="#8EBB91"/><path d="M16 15.5c0-5.5 3.5-9 9-9 0 5.5-3.5 9-9 9z" fill="#F3F6EC"/></svg>';
 const TABS=[["scan","Skanna"],["fridge","Kylskåp"],["recipe","Recept"],["profile","Profil"]];
 const CATS=["Alla","Grönsaker","Mejeri","Kött","Annat"];
 const EMO={Grönsaker:"🥬",Mejeri:"🥛",Kött:"🍗",Annat:"🥫"};
