@@ -182,7 +182,8 @@ function viewProfile(){
 return`<h1>Profil</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
 <div class="card stack"><div class="between"><span>Namn</span><b>${esc(acct&&acct.name)}</b></div>${acct&&acct.email?`<div class="between"><span>E-post</span><b>${esc(acct.email)}</b></div>`:""}<div class="between"><span>Varor hemma</span><b>${items.length}</b></div></div>
 <p class="muted" style="margin:1rem 0">Dina varor sparas på ditt konto, så de följer med om du loggar in på en annan enhet.</p>
-<div class="actions"><button class="btn" data-act="logout">Logga ut</button><button class="btn btn--ghost" data-act="reset">Ta bort alla mina varor</button></div>`}
+<div class="actions"><button class="btn" data-act="logout">Logga ut</button><button class="btn btn--ghost" data-act="reset">Ta bort alla mina varor</button></div>
+<div class="actions"><button class="btn btn--ghost" data-act="delacct" style="color:var(--mk-danger);border-color:var(--mk-danger)">Ta bort mitt konto</button></div>`}
 
 function viewAuth(){
 const su=st.authMode==="signup";
@@ -217,6 +218,7 @@ else if(D.act==="closescan"){closeScan();return}
 else if(D.act==="demo"){await addDemo()}
 else if(D.act==="reset"){if(!confirm("Ta bort alla dina varor?"))return;await deleteAll()}
 else if(D.act==="logout"){try{await sb.auth.signOut()}catch(x){}setUser(null);items=[];st.tab="scan";window.scrollTo(0,0)}
+else if(D.act==="delacct"){if(!confirm("Vill du ta bort ditt konto och alla dina varor för alltid? Det går inte att ångra."))return;if(!await deleteAccount())return;st.tab="scan";window.scrollTo(0,0)}
 else if(D.act==="authmode"){st.authMode=st.authMode==="signup"?"login":"signup"}
 else if(D.act==="cancel"){st.adding=false;st.prefill=null}
 else if(D.act==="used"){const i=items.find(x=>x.id===id);if(i&&await removeItem(id))toast(i.name+" markerad som använd")}
@@ -265,6 +267,7 @@ async function loadItems(){const{data,error}=await sb.from("items").select("*").
 async function addItem(o){const{data,error}=await sb.from("items").insert(o).select().single();if(error){toast("Kunde inte spara varan. Försök igen.");return false}items.push(fromRow(data));return true}
 async function removeItem(id){const{error}=await sb.from("items").delete().eq("id",id);if(error){toast("Något gick fel. Försök igen.");return false}items=items.filter(x=>x.id!==id);return true}
 async function deleteAll(){const{error}=await sb.from("items").delete().eq("user_id",userId);if(error){toast("Något gick fel. Försök igen.");return}items=[];toast("Alla varor är borttagna")}
+async function deleteAccount(){const{error}=await sb.rpc("delete_my_account");if(error){toast("Kunde inte ta bort kontot. Försök igen.");return false}try{await sb.auth.signOut({scope:"local"})}catch(x){}setUser(null);items=[];toast("Ditt konto är borttaget");return true}
 async function addDemo(){const rows=DEMO.map(d=>({name:d.name,cat:d.cat,qty:d.qty,e:d.e,exp:addDays(d.days)}));const{data,error}=await sb.from("items").insert(rows).select();if(error){toast("Något gick fel. Försök igen.");return}items=items.concat(data.map(fromRow))}
 
 let scanner=null,busy=false;
