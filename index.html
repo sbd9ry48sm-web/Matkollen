@@ -4,68 +4,233 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matkollen</title>
+<meta name="theme-color" content="#050b09">
 <link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' aria-hidden='true'%3E%3Crect rx='9' fill='%23245B45'/%3E%3Cpath d='M16 25V15' stroke='%23F3F6EC' stroke-width='2' stroke-linecap='round' fill='none'/%3E%3Cpath d='M16 18c-5.5 0-8.5-3-8.5-7.5C13 10.5 16 13 16 18z' fill='%238EBB91'/%3E%3Cpath d='M16 15.5c0-5.5 3.5-9 9-9 0 5.5-3.5 9-9 9z' fill='%23F3F6EC'/%3E%3C/svg%3E">
 <style>
-:root{--mk-forest:#245B45;--mk-sage:#8EBB91;--mk-cream:#F3F6EC;--mk-white:#fff;--mk-ink:#25332B;--mk-muted:#59675E;--mk-border:#D8E0D4;--mk-warning:#D97732;--mk-danger:#B94040;
---r-md:.875rem;--r-lg:1.25rem;--shadow:0 4px 16px rgb(36 91 69/8%);--focus:0 0 0 3px rgb(142 187 145/55%);
---font:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-*{box-sizing:border-box}
-html{color-scheme:light}
-body{margin:0;background:var(--mk-cream);color:var(--mk-ink);font-family:var(--font);line-height:1.5;
-padding-top:env(safe-area-inset-top,0px)}
-#app{max-width:760px;margin:0 auto;padding:1.25rem 1rem calc(6rem + env(safe-area-inset-bottom,0px))}
-h1{font-size:1.75rem;line-height:1.2;margin:0 0 .25rem;letter-spacing:-.01em}
-h2{font-size:1.125rem;margin:1.75rem 0 .75rem}
-p{margin:0}
-.muted{color:var(--mk-muted)}
-.sub{margin-bottom:1.25rem}
-.brand{display:flex;align-items:center;gap:.625rem;color:var(--mk-forest);font-weight:750;font-size:1.25rem;letter-spacing:-.01em;margin-bottom:1rem}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.75rem;padding:.75rem 1.125rem;border:1px solid transparent;border-radius:var(--r-md);background:var(--mk-forest);color:#fff;font:inherit;font-weight:650;cursor:pointer}
-.btn:hover{background:#1C4938}
-.btn:active{transform:translateY(1px)}
-.btn--ghost{background:#fff;color:var(--mk-forest);border-color:var(--mk-border)}
-.btn--ghost:hover{background:var(--mk-cream)}
-.btn--onDark{background:#fff;color:var(--mk-forest)}
-.btn--onDark:hover{background:var(--mk-cream)}
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:none;box-shadow:var(--focus);border-color:var(--mk-forest)}
-.card{background:#fff;border:1px solid var(--mk-border);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:1rem}
-.stack{display:grid;gap:.75rem}
-.scan{background:var(--mk-forest);color:#fff;border-radius:var(--r-lg);padding:1.5rem;display:grid;gap:.75rem}
-.scan h2{margin:0;font-size:1.375rem}
-.scan p{color:#E3F0E3}
-.row{display:flex;align-items:center;gap:.75rem}
-.grow{flex:1;min-width:0}
-.between{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
-.emoji{width:2.75rem;height:2.75rem;border-radius:var(--r-md);background:var(--mk-cream);display:grid;place-items:center;font-size:1.5rem;flex:none}
-.name{font-weight:650}
-.status{display:inline-flex;align-items:center;gap:.375rem;padding:.25rem .625rem;border-radius:999px;font-size:.8125rem;font-weight:650;white-space:nowrap}
-.status::before{content:"";width:.5rem;height:.5rem;border-radius:50%;background:currentColor}
-.s-good{background:#E3F0E3;color:#245B45}
-.s-soon{background:#FFF0DF;color:#8A4312}
-.s-urgent{background:#FBE7E5;color:#8D2727}
-.input{display:block;width:100%;min-height:2.75rem;padding:.75rem .875rem;border:1px solid var(--mk-border);border-radius:var(--r-md);background:#fff;color:var(--mk-ink);font:inherit}
-.chips{display:flex;gap:.5rem;overflow-x:auto;padding:.75rem 0 .25rem;margin:0 -1rem;padding-inline:1rem}
-.chip{flex:none;min-height:2.5rem;padding:.5rem 1rem;border-radius:999px;border:1px solid var(--mk-border);background:#fff;color:var(--mk-ink);font:inherit;cursor:pointer}
-.chip[aria-pressed=true]{background:var(--mk-forest);border-color:var(--mk-forest);color:#fff;font-weight:650}
-.tag{display:inline-block;font-size:.8125rem;font-weight:650;padding:.125rem .5rem;border-radius:.5rem;background:#E3F0E3;color:#245B45}
-.tag--save{background:#FFF0DF;color:#8A4312}
-.have{color:var(--mk-forest)}
-.miss{color:#8D2727}
-.link{background:none;border:0;padding:.5rem 0;color:var(--mk-forest);font:inherit;font-weight:650;cursor:pointer;min-height:2.75rem}
-.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
-.form{display:grid;gap:.75rem}
-label{font-weight:650;font-size:.9375rem;display:grid;gap:.25rem}
-.empty{text-align:center;padding:2rem 1rem}
-.empty .emoji{margin:0 auto .75rem;width:3.5rem;height:3.5rem;font-size:1.75rem}
-ol.steps{padding-left:1.25rem;margin:.5rem 0 0;display:grid;gap:.75rem}
-.hero{height:9rem;border-radius:var(--r-lg);background:linear-gradient(135deg,#8EBB91,#E3F0E3);display:grid;place-items:center;font-size:4rem;margin-bottom:1rem}
-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,760px);display:grid;grid-template-columns:repeat(4,1fr);gap:.25rem;padding:.5rem .5rem calc(.5rem + env(safe-area-inset-bottom,0px));border-top:1px solid var(--mk-border);background:#fff}
-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;min-height:3.25rem;border:0;border-radius:var(--r-md);background:transparent;color:var(--mk-muted);font:inherit;font-size:.75rem;cursor:pointer}
-nav button[aria-current=page]{background:var(--mk-cream);color:var(--mk-forest);font-weight:700}
-nav svg{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.toast{position:fixed;left:50%;bottom:5.5rem;transform:translateX(-50%);background:var(--mk-ink);color:#fff;padding:.75rem 1rem;border-radius:var(--r-md);font-size:.9375rem;max-width:90%}
-.scanBox{position:fixed;inset:0;z-index:20;background:var(--mk-cream);overflow:auto;padding:calc(1.25rem + env(safe-area-inset-top,0px)) 1rem 2rem}.scanBox[hidden]{display:none}.scanIn{max-width:760px;margin:0 auto}#reader{border-radius:var(--r-lg);overflow:hidden;background:#1d2a23;min-height:11rem}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+ eller före </head>.
+Använd HTML-mönstren som referens och låt Claude koppla dem till befintliga funktioner.
+-->
+
+<style>
+/* ===== MATKOLLEN DESIGN SYSTEM ===== */
+:root {
+  color-scheme: dark;
+  --mk-bg: #050b09;
+  --mk-bg-soft: #08130f;
+  --mk-surface: #0b1914;
+  --mk-surface-2: #10231b;
+  --mk-surface-3: #153026;
+  --mk-border: rgba(74, 231, 126, .19);
+  --mk-border-strong: rgba(74, 231, 126, .42);
+  --mk-green: #45e87a;
+  --mk-green-2: #20c965;
+  --mk-green-deep: #07351d;
+  --mk-text: #f4faf6;
+  --mk-muted: #a8bbb0;
+  --mk-dim: #71877a;
+  --mk-danger: #ff655f;
+  --mk-warning: #ffc857;
+  --mk-ok: #55df8a;
+  --mk-radius-sm: 12px;
+  --mk-radius: 18px;
+  --mk-radius-lg: 24px;
+  --mk-shadow: 0 14px 36px rgba(0,0,0,.24);
+  --mk-page-width: 760px;
+  --mk-safe-bottom: env(safe-area-inset-bottom, 0px);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html { background: var(--mk-bg); scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(23, 97, 55, .15), transparent 34rem),
+    var(--mk-bg);
+  color: var(--mk-text);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+a { color: var(--mk-green); }
+img { max-width: 100%; }
+.mk-app { width: 100%; max-width: var(--mk-page-width); min-height: 100dvh; margin: 0 auto; padding-bottom: calc(86px + var(--mk-safe-bottom)); }
+.mk-page { padding: 18px 16px 26px; }
+.mk-hidden { display: none !important; }
+
+/* Type and shared layout */
+.mk-eyebrow { color: var(--mk-green); font-size: .75rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+.mk-title { margin: 5px 0 8px; font-size: clamp(1.65rem, 6vw, 2.15rem); line-height: 1.12; letter-spacing: -.045em; font-weight: 820; }
+.mk-subtitle { margin: 0; color: var(--mk-muted); line-height: 1.5; font-size: .94rem; }
+.mk-section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 25px 0 12px; }
+.mk-section-head h2 { margin:0; font-size:1.08rem; letter-spacing:-.02em; }
+.mk-link { color:var(--mk-green); background:none; border:0; padding:8px 0; font-size:.82rem; font-weight:750; text-decoration:none; cursor:pointer; }
+.mk-row { display:flex; align-items:center; gap:12px; }
+.mk-between { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.mk-stack { display:grid; gap:12px; }
+.mk-muted { color:var(--mk-muted); }
+.mk-small { font-size:.78rem; }
+.mk-divider { height:1px; border:0; background:var(--mk-border); margin:16px 0; }
+
+/* Header */
+.mk-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 16px 16px 8px; }
+.mk-brand { display:flex; align-items:center; gap:9px; color:var(--mk-text); font-weight:850; font-size:1.12rem; letter-spacing:-.04em; }
+.mk-leaf { display:inline-grid; place-items:center; width:30px; height:30px; color:var(--mk-green); font-size:1.35rem; }
+.mk-icon-btn { display:grid; place-items:center; width:42px; height:42px; border:1px solid var(--mk-border); border-radius:15px; background:rgba(10,28,20,.85); color:var(--mk-text); cursor:pointer; font-size:1.1rem; }
+.mk-icon-btn:focus-visible, .mk-btn:focus-visible, .mk-nav-item:focus-visible { outline:2px solid var(--mk-green); outline-offset:3px; }
+
+/* Buttons */
+.mk-btn { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px; padding:13px 18px; border:1px solid transparent; border-radius:999px; background:linear-gradient(110deg, #52ed83, #24ce68); color:#052311; font-weight:800; text-decoration:none; text-align:center; cursor:pointer; box-shadow:0 7px 22px rgba(37,211,102,.13); transition:transform .15s ease, filter .15s ease; }
+.mk-btn:active { transform:scale(.985); }
+.mk-btn-block { width:100%; }
+.mk-btn-secondary { color:var(--mk-text); background:rgba(12,29,21,.8); border-color:var(--mk-border-strong); box-shadow:none; }
+.mk-btn-quiet { color:var(--mk-green); background:transparent; box-shadow:none; }
+.mk-btn:disabled { opacity:.48; cursor:not-allowed; }
+
+/* Cards and chips */
+.mk-card { background:linear-gradient(145deg, rgba(16,37,28,.97), rgba(7,20,14,.98)); border:1px solid var(--mk-border); border-radius:var(--mk-radius); box-shadow:var(--mk-shadow); overflow:hidden; }
+.mk-card-pad { padding:15px; }
+.mk-chip { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:31px; padding:6px 12px; border:1px solid var(--mk-border); border-radius:999px; background:#0b1c14; color:var(--mk-muted); font-size:.78rem; font-weight:700; white-space:nowrap; }
+.mk-chip-active { background:var(--mk-green); color:#052311; border-color:var(--mk-green); }
+.mk-badge { display:inline-flex; align-items:center; padding:5px 9px; border-radius:999px; font-size:.72rem; font-weight:800; white-space:nowrap; }
+.mk-badge-danger { background:rgba(255,101,95,.16); color:#ff827b; }
+.mk-badge-warning { background:rgba(255,200,87,.16); color:#ffd36d; }
+.mk-badge-ok { background:rgba(69,232,122,.13); color:#6cf098; }
+
+/* Product rows */
+.mk-product-list { display:grid; gap:9px; }
+.mk-product { display:flex; align-items:center; gap:12px; min-width:0; padding:11px; border:1px solid rgba(74,231,126,.13); border-radius:16px; background:rgba(5,17,12,.7); }
+.mk-product-img { flex:0 0 54px; width:54px; height:54px; display:grid; place-items:center; overflow:hidden; border-radius:13px; background:linear-gradient(145deg,#173d29,#0b2016); font-size:1.7rem; }
+.mk-product-img img { width:100%; height:100%; object-fit:cover; }
+.mk-product-info { flex:1; min-width:0; }
+.mk-product-info strong { display:block; font-size:.92rem; margin-bottom:4px; }
+.mk-product-info p { margin:0; color:var(--mk-muted); font-size:.77rem; line-height:1.4; }
+.mk-product-side { display:grid; justify-items:end; gap:6px; }
+
+/* Home hero */
+.mk-hero { position:relative; overflow:hidden; min-height:205px; padding:20px; border-radius:var(--mk-radius-lg); border:1px solid var(--mk-border); background:radial-gradient(ellipse at 85% 10%,rgba(57,210,103,.22),transparent 45%), linear-gradient(135deg,#102d1e,#06100b 75%); }
+.mk-hero h1 { max-width:290px; margin:0 0 9px; font-size:1.8rem; line-height:1.08; letter-spacing:-.05em; }
+.mk-hero p { max-width:280px; color:#c0d0c5; margin:0 0 18px; font-size:.9rem; line-height:1.5; }
+.mk-hero-art { position:absolute; right:-22px; top:10px; width:45%; max-width:190px; opacity:.72; pointer-events:none; mask-image:linear-gradient(to left,black 65%,transparent); }
+.mk-hero .mk-btn { position:relative; z-index:1; }
+
+/* Recipe cards */
+.mk-recipe-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+.mk-recipe { overflow:hidden; border:1px solid var(--mk-border); border-radius:19px; background:var(--mk-surface); }
+.mk-recipe-img { position:relative; height:165px; background:linear-gradient(135deg,#183b28,#0b1a12); overflow:hidden; }
+.mk-recipe-img img { width:100%; height:100%; object-fit:cover; }
+.mk-recipe-img .mk-badge { position:absolute; left:10px; top:10px; background:rgba(3,20,11,.86); color:var(--mk-green); }
+.mk-recipe-body { padding:13px; }
+.mk-recipe-body h3 { margin:0 0 6px; font-size:1rem; }
+.mk-recipe-body p { margin:0; color:var(--mk-muted); font-size:.82rem; line-height:1.45; }
+.mk-recipe-meta { display:flex; gap:14px; color:var(--mk-muted); font-size:.76rem; margin-top:10px; }
+
+/* Search and form controls */
+.mk-search { position:relative; margin:14px 0; }
+.mk-search input { width:100%; min-height:46px; padding:12px 14px 12px 42px; color:var(--mk-text); background:#0b1b14; border:1px solid var(--mk-border); border-radius:999px; outline:none; }
+.mk-search::before { content:"⌕"; position:absolute; left:15px; top:7px; color:var(--mk-muted); font-size:1.5rem; }
+.mk-search input:focus, .mk-field input:focus, .mk-field select:focus, .mk-field textarea:focus { border-color:var(--mk-green); box-shadow:0 0 0 3px rgba(69,232,122,.1); outline:none; }
+.mk-field { display:grid; gap:7px; margin:14px 0; }
+.mk-field label { color:#d8e7dd; font-size:.82rem; font-weight:700; }
+.mk-field input, .mk-field select, .mk-field textarea { width:100%; min-height:48px; padding:12px 14px; border:1px solid var(--mk-border); border-radius:14px; color:var(--mk-text); background:#07150f; }
+.mk-field textarea { min-height:92px; resize:vertical; }
+.mk-help { color:var(--mk-muted); font-size:.75rem; line-height:1.45; }
+
+/* Scanner frame: keep existing scanner library/container and its JS IDs */
+.mk-scanner-shell { position:relative; overflow:hidden; min-height:360px; border:1px solid var(--mk-border-strong); border-radius:24px; background:#020806; }
+.mk-scanner-shell video, .mk-scanner-shell canvas { width:100% !important; height:auto !important; object-fit:cover; }
+.mk-scan-guide { position:absolute; inset:22% 12%; border:2px solid var(--mk-green); border-radius:20px; box-shadow:0 0 0 999px rgba(0,0,0,.25),0 0 28px rgba(69,232,122,.16); pointer-events:none; }
+.mk-scan-guide::after { content:""; position:absolute; left:10%; right:10%; top:50%; height:2px; background:var(--mk-green); box-shadow:0 0 12px var(--mk-green); }
+.mk-scan-hint { color:var(--mk-muted); text-align:center; font-size:.85rem; line-height:1.45; margin:12px 0 18px; }
+
+/* Notifications and settings */
+.mk-setting-row { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--mk-border); }
+.mk-setting-row:last-child { border-bottom:0; }
+.mk-setting-icon { display:grid; place-items:center; flex:0 0 40px; width:40px; height:40px; border-radius:14px; color:var(--mk-green); background:#10291c; }
+.mk-setting-copy { flex:1; min-width:0; }
+.mk-setting-copy strong { display:block; font-size:.88rem; }
+.mk-setting-copy p { margin:4px 0 0; color:var(--mk-muted); font-size:.76rem; line-height:1.4; }
+.mk-switch { appearance:none; width:44px; height:26px; flex:0 0 44px; border-radius:999px; background:#33483b; position:relative; cursor:pointer; transition:background .15s; }
+.mk-switch::after { content:""; position:absolute; width:20px; height:20px; top:3px; left:3px; background:#fff; border-radius:50%; transition:transform .15s; }
+.mk-switch:checked { background:var(--mk-green-2); }
+.mk-switch:checked::after { transform:translateX(18px); background:#052311; }
+
+/* Bottom navigation — preserve existing routes/handlers when integrating */
+.mk-bottom-nav { position:fixed; z-index:50; bottom:0; left:50%; transform:translateX(-50%); width:min(100%, var(--mk-page-width)); display:grid; grid-template-columns:repeat(4,1fr); padding:9px 8px calc(9px + var(--mk-safe-bottom)); background:rgba(4,13,9,.94); backdrop-filter:blur(18px); border-top:1px solid var(--mk-border); }
+.mk-nav-item { display:grid; justify-items:center; align-content:center; gap:4px; min-height:48px; color:var(--mk-dim); background:transparent; border:0; border-radius:13px; font-size:.68rem; font-weight:700; cursor:pointer; text-decoration:none; }
+.mk-nav-icon { font-size:1.15rem; line-height:1; }
+.mk-nav-item[aria-current="page"], .mk-nav-item.is-active { color:var(--mk-green); }
+.mk-nav-item[aria-current="page"] .mk-nav-icon, .mk-nav-item.is-active .mk-nav-icon { filter:drop-shadow(0 0 7px rgba(69,232,122,.25)); }
+
+/* Five-step onboarding design shell */
+.mk-onboarding { min-height:100dvh; display:flex; flex-direction:column; padding:18px 20px calc(22px + var(--mk-safe-bottom)); background:radial-gradient(ellipse at 50% 12%,rgba(29,112,58,.22),transparent 45%),var(--mk-bg); }
+.mk-onboard-progress { align-self:center; color:var(--mk-green); border:1px solid var(--mk-border-strong); border-radius:999px; padding:6px 12px; font-size:.78rem; margin:4px 0 20px; }
+.mk-onboard-content { flex:1; display:flex; flex-direction:column; justify-content:center; }
+.mk-onboard-art { width:100%; max-height:34vh; object-fit:cover; border-radius:22px; margin:18px 0; mask-image:linear-gradient(to bottom,black 72%,transparent); }
+.mk-onboard-content h1 { margin:0 0 12px; font-size:clamp(1.8rem,7vw,2.45rem); line-height:1.08; letter-spacing:-.045em; }
+.mk-onboard-content p { color:var(--mk-muted); font-size:.98rem; line-height:1.6; margin:0; }
+.mk-onboard-footer { display:grid; gap:13px; margin-top:20px; }
+.mk-onboard-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.mk-dots { display:flex; align-items:center; justify-content:center; gap:8px; }
+.mk-dot { width:8px; height:8px; border-radius:50%; background:#244236; border:0; padding:0; }
+.mk-dot.is-active { width:22px; border-radius:99px; background:var(--mk-green); }
+.mk-onboard-arrow { width:42px; height:42px; border-radius:50%; border:1px solid var(--mk-border-strong); background:transparent; color:var(--mk-green); font-size:1.15rem; cursor:pointer; }
+
+/* Empty, success, error states */
+.mk-empty { padding:28px 18px; text-align:center; border:1px dashed var(--mk-border-strong); border-radius:18px; color:var(--mk-muted); }
+.mk-empty-icon { font-size:2rem; margin-bottom:8px; }
+.mk-alert { padding:12px 14px; border:1px solid var(--mk-border); border-radius:14px; background:var(--mk-surface); color:var(--mk-muted); font-size:.84rem; line-height:1.45; }
+.mk-alert-error { border-color:rgba(255,101,95,.35); color:#ffaaa5; }
+.mk-alert-success { border-color:rgba(69,232,122,.3); color:#8cf3ad; }
+
+/* Larger screens */
+@media (min-width:560px) {
+  .mk-page { padding:22px 22px 30px; }
+  .mk-header { padding-left:22px; padding-right:22px; }
+  .mk-recipe-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .mk-hero { min-height:230px; padding:24px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
+}
+
+/* ===== Matkollen: befintliga klasser i den nya designen ===== */
+body{padding-top:env(safe-area-inset-top,0px);line-height:1.5}
+#app{max-width:var(--mk-page-width);margin:0 auto;padding:18px 16px calc(96px + var(--mk-safe-bottom))}
+h1{margin:0 0 6px;font-size:clamp(1.65rem,6vw,2.15rem);line-height:1.12;letter-spacing:-.045em;font-weight:820}
+h2{margin:25px 0 12px;font-size:1.08rem;letter-spacing:-.02em}.mk-section-head h2{margin:0}
+p{margin:0}.muted{color:var(--mk-muted)}.sub{margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:850;font-size:1.12rem;letter-spacing:-.04em;margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:13px 18px;border:1px solid transparent;border-radius:999px;background:linear-gradient(110deg,#52ed83,#24ce68);color:#052311;font-weight:800;cursor:pointer}
+.btn:active{transform:scale(.985)}
+.btn--ghost,.btn--onDark{color:var(--mk-text);background:rgba(12,29,21,.8);border-color:var(--mk-border-strong)}
+.card{background:linear-gradient(145deg,rgba(16,37,28,.97),rgba(7,20,14,.98));border:1px solid var(--mk-border);border-radius:var(--mk-radius);box-shadow:var(--mk-shadow);padding:15px}
+.stack{display:grid;gap:12px}.row{display:flex;align-items:center;gap:12px}.grow{flex:1;min-width:0}
+.between{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.emoji{width:54px;height:54px;border-radius:13px;background:linear-gradient(145deg,#173d29,#0b2016);display:grid;place-items:center;font-size:1.7rem;flex:none}
+.name{font-weight:700}
+.input{display:block;width:100%;min-height:48px;padding:12px 14px;border:1px solid var(--mk-border);border-radius:14px;background:#07150f;color:var(--mk-text)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--mk-green);box-shadow:0 0 0 3px rgba(69,232,122,.1)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--mk-green);outline-offset:3px}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 4px;padding:0 16px}
+.chip{flex:none;min-height:31px;padding:6px 14px;border:1px solid var(--mk-border);border-radius:999px;background:#0b1c14;color:var(--mk-muted);font-weight:700;font-size:.82rem;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--mk-green);border-color:var(--mk-green);color:#052311}
+.tag{display:inline-block;padding:3px 8px;border-radius:8px;font-size:.78rem;font-weight:750;background:rgba(69,232,122,.13);color:#6cf098}
+.have{color:var(--mk-ok)}.miss{color:var(--mk-danger)}
+.link{background:none;border:0;padding:8px 0;color:var(--mk-green);font-weight:750;cursor:pointer;min-height:44px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.form{display:grid;gap:12px}label{display:grid;gap:6px;font-weight:700;font-size:.85rem;color:#d8e7dd}
+.empty{text-align:center;padding:28px 18px;border-style:dashed}.empty .emoji{margin:0 auto 10px}
+ol.steps{padding-left:1.25rem;margin:8px 0 0;display:grid;gap:12px;line-height:1.55}
+.hero{height:9rem;border-radius:var(--mk-radius-lg);background:radial-gradient(ellipse at 80% 10%,rgba(57,210,103,.25),transparent 55%),linear-gradient(135deg,#153026,#07120d);display:grid;place-items:center;font-size:4rem;margin-bottom:14px}
+nav{position:fixed;z-index:50;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,var(--mk-page-width));display:grid;grid-template-columns:repeat(4,1fr);padding:9px 8px calc(9px + var(--mk-safe-bottom));background:rgba(4,13,9,.94);backdrop-filter:blur(18px);border-top:1px solid var(--mk-border)}
+nav button{display:grid;justify-items:center;align-content:center;gap:4px;min-height:48px;border:0;border-radius:13px;background:transparent;color:var(--mk-dim);font-size:.68rem;font-weight:700;cursor:pointer}
+nav button[aria-current=page]{color:var(--mk-green)}
+nav svg{width:1.4rem;height:1.4rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;left:50%;bottom:6rem;transform:translateX(-50%);background:var(--mk-surface-3);color:var(--mk-text);border:1px solid var(--mk-border-strong);padding:12px 16px;border-radius:14px;font-size:.92rem;max-width:90%;z-index:60}
+.scanBox{position:fixed;inset:0;z-index:70;background:var(--mk-bg);overflow:auto;padding:calc(20px + env(safe-area-inset-top,0px)) 16px 32px}.scanBox[hidden]{display:none}.scanIn{max-width:var(--mk-page-width);margin:0 auto}
+#reader{border-radius:var(--mk-radius);overflow:hidden;background:#020806;min-height:11rem;border:1px solid var(--mk-border-strong)}
+.mk-onboard-arrow:disabled{opacity:.3}
 </style>
 </head>
 <body>
@@ -76,12 +241,12 @@ nav svg{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:1.
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 const ICONS={
-scan:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/></svg>',
+scan:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7M6 10v9h12v-9"/></svg>',
 fridge:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M6 10h12M9 6v1.5M9 13v3"/></svg>',
 recipe:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-2-1.5-5-1.5-8-1v14c3-.5 6-.5 8 1 2-1.5 5-1.5 8-1V4c-3-.5-6-.5-8 1zM12 5v14"/></svg>',
 profile:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg>'};
-const LEAF='<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#245B45"/><path d="M16 25V15" stroke="#F3F6EC" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M16 18c-5.5 0-8.5-3-8.5-7.5C13 10.5 16 13 16 18z" fill="#8EBB91"/><path d="M16 15.5c0-5.5 3.5-9 9-9 0 5.5-3.5 9-9 9z" fill="#F3F6EC"/></svg>';
-const TABS=[["scan","Skanna"],["fridge","Kylskåp"],["recipe","Recept"],["profile","Profil"]];
+const LEAF='<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#10291c"/><path d="M16 25V15" stroke="#45e87a" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M16 18c-5.5 0-8.5-3-8.5-7.5C13 10.5 16 13 16 18z" fill="#20c965"/><path d="M16 15.5c0-5.5 3.5-9 9-9 0 5.5-3.5 9-9 9z" fill="#45e87a"/></svg>';
+const TABS=[["scan","Hem"],["fridge","Kylskåp"],["recipe","Recept"],["profile","Profil"]];
 const CATS=["Alla","Grönsaker","Mejeri","Kött","Annat"];
 const EMO={Grönsaker:"🥬",Mejeri:"🥛",Kött:"🍗",Annat:"🥫"};
 
@@ -146,32 +311,29 @@ const MORE=[
 [25,"Stuvad spenat med ägg",30,"🥬",4,"Spenat|400 g, fryst eller färsk;Ägg|4 st;Potatis|800 g;Mjölk|2 dl;Vetemjöl|1 msk|1;Smör|1 msk|1;Salt|1 tsk|1","Koka 800 g potatis i 15–20 minuter och hårdkoka 4 ägg i 9 minuter.~Smält 1 msk smör, rör ner 1 msk vetemjöl och späd med 2 dl mjölk under vispning. Tillsätt 400 g spenat och 1 tsk salt och sjud 5 minuter.~Servera med potatis och halverade ägg."],
 [26,"Fläskfilé med champinjonsås",45,"🍖",4,"Fläskfilé|600 g;Champinjoner|250 g;Grädde|2 dl;Potatis|800 g;Smör|1 msk|1;Salt|1 tsk|1;Svartpeppar|efter smak|1","Sätt ugnen på 175 °C. Koka 800 g potatis i 15–20 minuter.~Salta och peppra filén och bryn den runt om i 1 msk smör i 5 minuter. Grädda i ugnen i 20–25 minuter tills innertemperaturen är 70 °C.~Fräs skivade champinjoner i pannan, häll i 2 dl grädde och sjud 5 minuter.~Skiva filén och servera med sås och potatis."]];
 MORE.forEach(([id,name,min,e,serv,ing,st])=>RECIPES.push({id,name,min,e,serv,ing:ing.split(";").map(x=>{const q=x.split("|");return q[2]?[q[0],q[1],1]:[q[0],q[1]]}),steps:st.split("~")}));
-let st={tab:"scan",cat:"Alla",q:"",adding:false,recipe:null,favs:new Set(),onlyFav:false,authMode:"signup"};
+let st={tab:"scan",cat:"Alla",q:"",adding:false,recipe:null,favs:new Set(),onlyFav:false,authMode:"signup",onb:0,onbDone:(()=>{try{return localStorage.getItem("mk_onb")==="1"}catch(e){return false}})()};
 const $=s=>document.querySelector(s);
 const status=d=>d<=0?["urgent","Behöver användas idag"]:d<=3?["soon","Använd snart"]:["good","Bra"];
-const badge=d=>{const[k,t]=status(d);return`<span class="status s-${k}">${t}</span>`};
+const badge=d=>{const[k,t]=status(d);return`<span class="mk-badge mk-badge-${{urgent:"danger",soon:"warning",good:"ok"}[k]}">${t}</span>`};
 const left=d=>d<0?"Utgången för "+(-d)+(d===-1?" dag":" dagar")+" sedan":d===0?"Går ut idag":d===1?"1 dag kvar":d+" dagar kvar";
 const sorted=()=>[...items].sort((a,b)=>a.days-b.days);
 const has=n=>items.find(i=>i.name.toLowerCase()===n.toLowerCase());
 function rInfo(r){const have=[],miss=[];let urgent=false;r.ing.forEach(([n,a,basic])=>{if(basic)return;const it=has(n);if(it){have.push(n);if(it.days<=3)urgent=true}else miss.push(n)});return{have,miss,urgent,score:(urgent?100:0)+have.length*5-miss.length}}
 const ranked=()=>RECIPES.map(r=>({r,...rInfo(r)})).filter(x=>x.have.length).sort((a,b)=>b.score-a.score);
 
-function itemCard(i){return`<div class="card"><div class="row"><div class="emoji" aria-hidden="true">${i.e}</div><div class="grow"><div class="name">${esc(i.name)}</div><div class="muted">${esc(i.qty)} · ${left(i.days)}</div></div>${badge(i.days)}</div>
+function itemCard(i){return`<div class="card"><div class="mk-product" style="border:0;padding:0;background:none"><div class="mk-product-img" aria-hidden="true">${i.e}</div><div class="mk-product-info"><strong>${esc(i.name)}</strong><p>${esc(i.qty)} · ${left(i.days)}</p></div><div class="mk-product-side">${badge(i.days)}</div></div>
 <div class="actions"><button class="btn btn--ghost" data-act="used" data-id="${i.id}">Markera som använd</button><button class="btn btn--ghost" data-act="del" data-id="${i.id}">Ta bort</button></div></div>`}
-function recipeCard(x){const{r,have,miss,urgent}=x;return`<button class="card" style="text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%" data-act="open" data-id="${r.id}">
-<div class="row"><div class="emoji" aria-hidden="true">${r.e}</div><div class="grow"><div class="name">${r.name}</div><div class="muted">${r.min} min</div></div>${urgent?'<span class="tag tag--save">Rädda maten</span>':''}</div>
-<p style="margin-top:.75rem"><span class="have"><b>Du har hemma:</b> ${have.join(", ")}</span></p>
-${miss.length?`<p><span class="miss"><b>Du saknar:</b> ${miss.join(", ")}</span></p>`:'<p class="have"><b>Du har allt som behövs</b></p>'}</button>`}
+function recipeCard(x){const{r,have,miss,urgent}=x;return`<button class="mk-recipe" style="text-align:left;font:inherit;color:inherit;cursor:pointer;padding:0;width:100%" data-act="open" data-id="${r.id}"><div class="mk-recipe-img" style="display:grid;place-items:center;font-size:4rem" aria-hidden="true">${r.e}${urgent?'<span class="mk-badge">Rädda maten</span>':''}</div><div class="mk-recipe-body"><h3>${r.name}</h3><p class="have"><b>Du har hemma:</b> ${have.join(", ")}</p>${miss.length?`<p class="miss"><b>Du saknar:</b> ${miss.join(", ")}</p>`:'<p class="have"><b>Du har allt som behövs</b></p>'}<div class="mk-recipe-meta"><span>⏱ ${r.min} min</span></div></div></button>`}
 
 function viewScan(){
 const first=sorted().filter(i=>i.days<=3),rec=ranked().slice(0,2);
 return`<div class="brand">${LEAF}<span>Matkollen</span></div>
-<h1>Hej${acct?", "+esc(acct.name):""}!</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
-<section class="scan"><h2>Skanna en vara</h2><p>Rikta kameran mot streckkoden så lägger vi in varan i kylskåpet.</p><div class="actions" style="margin-top:0"><button class="btn btn--onDark" data-act="scan">Skanna streckkod</button><button class="btn btn--onDark" data-act="add">Lägg till vara</button></div></section>
+<p class="mk-eyebrow" style="margin:2px 0 12px">Hej${acct?", "+esc(acct.name):""}!</p>
+<section class="mk-hero"><h1>Tillsammans minskar vi matsvinnet</h1><p>Skanna, upptäck och laga innan maten blir för gammal.</p><div class="actions" style="margin-top:0"><button class="mk-btn" data-act="scan">▣ Skanna vara</button><button class="mk-btn mk-btn-secondary" data-act="add">Lägg till vara</button></div></section>
 <h2>Ditt kylskåp</h2><div class="card between"><div><div class="name">${items.length} varor hemma</div><div class="muted">${first.length} behöver användas snart</div></div><button class="link" data-go="fridge">Se alla</button></div>
-<h2>Behöver användas först</h2><div class="stack">${first.length?first.map(i=>`<div class="card row"><div class="emoji" aria-hidden="true">${i.e}</div><div class="grow"><div class="name">${esc(i.name)}</div><div class="muted">${left(i.days)}</div></div>${badge(i.days)}</div>`).join(""):'<div class="card muted">Inget behöver användas just nu.</div>'}</div>
-<div class="between"><h2>Recept med dina varor</h2><button class="link" data-go="recipe">Se alla</button></div>
-${rec.length?`<div class="stack">${rec.map(recipeCard).join("")}</div>`:'<div class="card muted">Lägg in några varor så dyker receptförslag upp här.</div>'}`}
+<h2>Behöver användas först</h2><div class="stack">${first.length?first.map(i=>`<div class="mk-product"><div class="mk-product-img" aria-hidden="true">${i.e}</div><div class="mk-product-info"><strong>${esc(i.name)}</strong><p>${left(i.days)}</p></div><div class="mk-product-side">${badge(i.days)}</div></div>`).join(""):'<div class="card muted">Inget behöver användas just nu.</div>'}</div>
+<div class="mk-section-head"><h2>Recept som räddar maten</h2><button class="mk-link" data-go="recipe">Se alla →</button></div>
+${rec.length?`<div class="mk-recipe-grid">${rec.map(recipeCard).join("")}</div>`:'<div class="card muted">Lägg in några varor så dyker receptförslag upp här.</div>'}`}
 
 function viewFridge(){
 return`<h1>Kylskåp</h1><p class="muted sub">${items.length} varor hemma</p>
@@ -181,7 +343,7 @@ ${st.adding?`<form class="card form" id="addForm" style="margin-top:.75rem"><lab
 <label>Bäst före-datum<input class="input" name="d" type="date" required value="${toISO(addDays(5))}"></label>
 <label>Mängd (valfritt)<input class="input" name="q" placeholder="Till exempel 500 g" value="${esc((st.prefill||{}).qty)}"></label>
 <div class="actions" style="margin-top:0"><button class="btn" type="submit">Spara vara</button><button class="btn btn--ghost" type="button" data-act="cancel">Avbryt</button></div></form>`:""}
-<div style="margin-top:.75rem"><input class="input" id="q" type="search" placeholder="Sök bland dina varor" aria-label="Sök bland dina varor" value="${st.q}"></div>
+<label class="mk-search"><input id="q" type="search" placeholder="Sök bland dina varor" aria-label="Sök bland dina varor" value="${st.q}"></label>
 <div class="chips" role="group" aria-label="Kategori">${CATS.map(c=>`<button class="chip" data-cat="${c}" aria-pressed="${st.cat===c}">${c}</button>`).join("")}</div>
 <div id="list"></div>`}
 function fridgeList(){
@@ -199,8 +361,8 @@ const soon=list.filter(x=>x.urgent),other=list.filter(x=>!x.urgent);
 return`<h1>Recept med det du har hemma</h1><p class="muted sub">Vi börjar med det som går ut först.</p>
 <div class="chips" role="group" aria-label="Visa"><button class="chip" data-fav="0" aria-pressed="${!st.onlyFav}">Alla förslag</button><button class="chip" data-fav="1" aria-pressed="${st.onlyFav}">Mina favoriter</button></div>
 ${!list.length?'<div class="card empty"><div class="emoji" aria-hidden="true">🍽️</div><p class="name">Inga recept matchar just nu</p><p class="muted">Lägg till fler varor eller ändra filtren för att se fler förslag.</p></div>':""}
-${soon.length?`<h2>Rädda maten</h2><div class="stack">${soon.map(recipeCard).join("")}</div>`:""}
-${other.length?`<h2>Fler förslag</h2><div class="stack">${other.map(recipeCard).join("")}</div>`:""}`}
+${soon.length?`<h2>Rädda maten</h2><div class="mk-recipe-grid">${soon.map(recipeCard).join("")}</div>`:""}
+${other.length?`<h2>Fler förslag</h2><div class="mk-recipe-grid">${other.map(recipeCard).join("")}</div>`:""}`}
 
 function viewDetail(){
 const r=RECIPES.find(x=>x.id===st.recipe),x=rInfo(r),fav=st.favs.has(r.id);
@@ -218,6 +380,13 @@ return`<h1>Profil</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
 <div class="actions"><button class="btn" data-act="logout">Logga ut</button><button class="btn btn--ghost" data-act="reset">Ta bort alla mina varor</button></div>
 <div class="actions"><button class="btn btn--ghost" data-act="delacct" style="color:var(--mk-danger);border-color:var(--mk-danger)">Ta bort mitt konto</button></div>`}
 
+const ONB=[["🌿","Välkommen till Matkollen","Minska matsvinnet och spara pengar. Matkollen hjälper dig använda maten innan den går ut."],["▣","Skanna och håll koll på datum","Skanna streckkoden eller lägg in varan själv, så håller appen koll på bäst före-datum åt dig."],["🍳","Recept som räddar maten","Du får receptförslag på det du har hemma, och det som går ut först kommer överst."],["🔔","Smarta notiser","Få en påminnelse när något snart går ut, så att du hinner använda det."],["🌍","Gör skillnad","Varje vara du räddar är mat som inte slängs. Skapa ett konto så sparas allt åt dig."]];
+function viewOnb(){const i=st.onb,[e,t,d]=ONB[i],last=i===ONB.length-1;
+return`<div class="mk-onboarding" style="padding:0;min-height:calc(100dvh - 40px);background:none"><div class="mk-onboard-progress">${i+1} / ${ONB.length}</div>
+<div class="mk-onboard-content"><div class="mk-onboard-art" style="display:grid;place-items:center;height:30vh;font-size:5rem;background:radial-gradient(ellipse at 50% 30%,rgba(57,210,103,.25),transparent 60%),linear-gradient(135deg,#153026,#07120d);border:1px solid var(--mk-border)" aria-hidden="true">${e}</div><h1>${t}</h1><p>${d}</p></div>
+<div class="mk-onboard-footer">${last?'<button class="mk-btn mk-btn-block" data-act="onbsignup">Skapa konto</button><button class="mk-btn mk-btn-secondary mk-btn-block" data-act="onblogin">Logga in</button>':""}
+<div class="mk-onboard-controls"><button class="mk-onboard-arrow" data-act="onbprev" aria-label="Föregående" ${i?"":"disabled"}>‹</button><div class="mk-dots" aria-hidden="true">${ONB.map((_,k)=>`<span class="mk-dot${k===i?" is-active":""}"></span>`).join("")}</div>${last?'<span style="width:42px"></span>':'<button class="mk-onboard-arrow" data-act="onbnext" aria-label="Nästa">›</button>'}</div>
+<button class="mk-link" data-act="onbskip">Hoppa över</button></div></div>`}
 function viewAuth(){
 const m=st.authMode,su=m==="signup",main=m==="signup"||m==="login";
 const head=main?"Använd maten innan den går ut":{forgot:"Glömt lösenordet?",reset:"Välj nytt lösenord"}[m];
@@ -241,12 +410,12 @@ ${m!=="forgot"?`<label>${m==="reset"?"Nytt lösenord":"Lösenord"}<input class="
 <p id="authMsg" class="miss" role="alert"></p>
 <button class="btn" type="submit">${btn}</button></form>
 ${links}
-<p class="muted" style="margin-top:1rem;font-size:.875rem">${su?"Genom att skapa konto godkänner du vår ":"Läs vår "}<a href="integritet.html" style="color:var(--mk-forest);font-weight:600">integritetspolicy</a>.</p></div>`}
+<p class="muted" style="margin-top:1rem;font-size:.875rem">${su?"Genom att skapa konto godkänner du vår ":"Läs vår "}<a href="integritet.html" style="color:var(--mk-green);font-weight:600">integritetspolicy</a>.</p></div>`}
 
 function render(){
 items.forEach(i=>{if(i.exp)i.days=daysLeft(i.exp)});
 if(!ready){$("#nav").innerHTML="";$("#main").innerHTML='<p class="muted" style="padding-top:3rem;text-align:center" role="status">Laddar…</p>';return}
-if(!acct){$("#nav").innerHTML="";$("#main").innerHTML=viewAuth();return}
+if(!acct){$("#nav").innerHTML="";$("#main").innerHTML=(!st.onbDone&&st.authMode!=="reset"?viewOnb():viewAuth());return}
 $("#nav").innerHTML=TABS.map(([k,l])=>`<button data-go="${k}" ${st.tab===k?'aria-current="page"':""}>${ICONS[k]}<span>${l}</span></button>`).join("");
 $("#main").innerHTML=st.tab==="recipe"&&st.recipe?viewDetail():{scan:viewScan,fridge:viewFridge,recipe:viewRecipes,profile:viewProfile}[st.tab]();
 if(st.tab==="fridge")fridgeList()}
@@ -265,6 +434,9 @@ else if(D.act==="demo"){await addDemo()}
 else if(D.act==="reset"){if(!confirm("Ta bort alla dina varor?"))return;await deleteAll()}
 else if(D.act==="logout"){try{await sb.auth.signOut()}catch(x){}setUser(null);items=[];st.tab="scan";window.scrollTo(0,0)}
 else if(D.act==="delacct"){if(!confirm("Vill du ta bort ditt konto och alla dina varor för alltid? Det går inte att ångra."))return;if(!await deleteAccount())return;st.tab="scan";window.scrollTo(0,0)}
+else if(D.act==="onbnext"){st.onb=Math.min(ONB.length-1,st.onb+1)}
+else if(D.act==="onbprev"){st.onb=Math.max(0,st.onb-1)}
+else if(D.act==="onbskip"||D.act==="onbsignup"||D.act==="onblogin"){st.onbDone=true;try{localStorage.setItem("mk_onb","1")}catch(x){}st.authMode=D.act==="onblogin"?"login":"signup";window.scrollTo(0,0)}
 else if(D.act==="forgot"){st.authMode="forgot"}
 else if(D.act==="tologin"){st.authMode="login"}
 else if(D.act==="authmode"){st.authMode=st.authMode==="signup"?"login":"signup"}
@@ -361,7 +533,7 @@ render();window.scrollTo(0,0);
 toast(p&&p.name?"Hittade varan. Fyll i bäst före-datum.":"Hittade inte varan. Skriv in namnet själv.")}
 (async()=>{
 if(!sb){ready=true;render();toast("Kunde inte ladda inloggningen. Kontrollera nätverket.");return}
-if(RECOVERY)st.authMode="reset";
+if(RECOVERY)st.authMode="reset";if(RECOVERY||LINKERR)st.onbDone=true;
 try{const{data}=await sb.auth.getSession();if(data.session&&!RECOVERY){setUser(data.session.user);await loadItems()}}catch(x){}
 ready=true;render();
 if(LINKERR&&!acct){st.authMode="forgot";render();const mm=$("#authMsg");if(mm){mm.textContent="Länken har gått ut. Be om en ny här.";mm.className="miss"}}
