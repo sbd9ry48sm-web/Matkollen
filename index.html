@@ -227,6 +227,21 @@ nav svg{width:1.4rem;height:1.4rem;fill:none;stroke:currentColor;stroke-width:1.
 .scanBox{position:fixed;inset:0;z-index:70;background:var(--mk-bg);overflow:auto;padding:calc(20px + env(safe-area-inset-top,0px)) 16px 32px}.scanBox[hidden]{display:none}.scanIn{max-width:var(--mk-page-width);margin:0 auto}
 #reader{border-radius:var(--mk-radius);overflow:hidden;background:#020806;min-height:11rem;border:1px solid var(--mk-border-strong)}
 .mk-onboard-arrow:disabled{opacity:.3}
+.mk-snart{display:flex;gap:10px;overflow-x:auto;margin:0 -16px;padding:0 16px 4px;scroll-snap-type:x mandatory}
+.mk-snart-card{flex:0 0 148px;scroll-snap-align:start;display:grid;gap:5px;justify-items:start;padding:11px;border:1px solid var(--mk-border);border-radius:16px;background:rgba(5,17,12,.7)}
+.mk-snart-card p{margin:0;color:var(--mk-muted);font-size:.74rem}.mk-snart-card .mk-product-img{width:46px;height:46px;flex:none}
+.mk-fab{position:fixed;right:max(16px,calc((100vw - 760px)/2 + 16px));bottom:calc(86px + var(--mk-safe-bottom));width:54px;height:54px;border-radius:50%;border:0;background:linear-gradient(110deg,#52ed83,#24ce68);color:#052311;font-size:1.9rem;font-weight:700;line-height:1;box-shadow:0 8px 22px rgba(37,211,102,.35);z-index:40;cursor:pointer}
+.mk-avatar{width:84px;height:84px;margin:0 auto;border-radius:50%;display:grid;place-items:center;border:2px solid var(--mk-green);background:#10291c;font-size:2.4rem;box-shadow:0 0 24px rgba(69,232,122,.25)}
+details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-marker{display:none}
+.mk-recipe-img{background:linear-gradient(135deg,#1c4a31,#0b1a12)}
+.mk-hero{padding-right:128px!important}.mk-hero h1,.mk-hero p{max-width:100%}
+nav:empty{display:none}
+.actions .btn,.actions .btn--ghost{min-height:40px;padding:8px 14px;font-size:.85rem}
+.mk-recipe-img{height:104px}
+.mk-search::before{top:50%;transform:translateY(-52%)}
+.mk-product-side{max-width:44%}
+.mk-product-info strong{overflow-wrap:anywhere}
+@media (max-width:420px){h1{font-size:1.55rem}.mk-hero{padding:18px;min-height:0}.mk-hero h1{font-size:1.5rem}.card{padding:13px}}
 </style>
 </head>
 <body>
@@ -309,31 +324,31 @@ const MORE=[
 MORE.forEach(([id,name,min,e,serv,ing,st])=>RECIPES.push({id,name,min,e,serv,ing:ing.split(";").map(x=>{const q=x.split("|");return q[2]?[q[0],q[1],1]:[q[0],q[1]]}),steps:st.split("~")}));
 let st={tab:"scan",cat:"Alla",q:"",adding:false,recipe:null,favs:new Set(),onlyFav:false,authMode:"signup",onb:0,onbDone:(()=>{try{return localStorage.getItem("mk_onb")==="1"}catch(e){return false}})()};
 const $=s=>document.querySelector(s);
-const status=d=>d<=0?["urgent","Behöver användas idag"]:d<=3?["soon","Använd snart"]:["good","Bra"];
-const badge=d=>{const[k,t]=status(d);return`<span class="mk-badge mk-badge-${{urgent:"danger",soon:"warning",good:"ok"}[k]}">${t}</span>`};
+const status=d=>d<=0?["urgent","Använd idag"]:d<=3?["soon","Använd snart"]:["good","Bra"];
+const MON=["jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec"],dm=t=>{const d=new Date(t);return d.getDate()+" "+MON[d.getMonth()]};
+const badge=d=>{const k=d<=1?"danger":d<=7?"warning":"ok";return`<span class="mk-badge mk-badge-${k}">${d<0?"Utgången":d===0?"Idag":d===1?"1 dag":d+" dagar"}</span>`};
 const left=d=>d<0?"Utgången för "+(-d)+(d===-1?" dag":" dagar")+" sedan":d===0?"Går ut idag":d===1?"1 dag kvar":d+" dagar kvar";
 const sorted=()=>[...items].sort((a,b)=>a.days-b.days);
 const has=n=>items.find(i=>i.name.toLowerCase()===n.toLowerCase());
 function rInfo(r){const have=[],miss=[];let urgent=false;r.ing.forEach(([n,a,basic])=>{if(basic)return;const it=has(n);if(it){have.push(n);if(it.days<=3)urgent=true}else miss.push(n)});return{have,miss,urgent,score:(urgent?100:0)+have.length*5-miss.length}}
 const ranked=()=>RECIPES.map(r=>({r,...rInfo(r)})).filter(x=>x.have.length).sort((a,b)=>b.score-a.score);
 
-function itemCard(i){return`<div class="card"><div class="mk-product" style="border:0;padding:0;background:none"><div class="mk-product-img" aria-hidden="true">${i.e}</div><div class="mk-product-info"><strong>${esc(i.name)}</strong><p>${esc(i.qty)} · ${left(i.days)}</p></div><div class="mk-product-side">${badge(i.days)}</div></div>
-<div class="actions"><button class="btn btn--ghost" data-act="used" data-id="${i.id}">Markera som använd</button><button class="btn btn--ghost" data-act="del" data-id="${i.id}">Ta bort</button></div></div>`}
-function recipeCard(x){const{r,have,miss,urgent}=x;return`<button class="mk-recipe" style="text-align:left;font:inherit;color:inherit;cursor:pointer;padding:0;width:100%" data-act="open" data-id="${r.id}"><div class="mk-recipe-img" style="display:grid;place-items:center;font-size:4rem" aria-hidden="true">${r.e}${urgent?'<span class="mk-badge">Rädda maten</span>':''}</div><div class="mk-recipe-body"><h3>${r.name}</h3><p class="have"><b>Du har hemma:</b> ${have.join(", ")}</p>${miss.length?`<p class="miss"><b>Du saknar:</b> ${miss.join(", ")}</p>`:'<p class="have"><b>Du har allt som behövs</b></p>'}<div class="mk-recipe-meta"><span>⏱ ${r.min} min</span></div></div></button>`}
+function itemCard(i){return`<details class="card" style="padding:11px"><summary><div class="mk-product" style="border:0;padding:0;background:none"><div class="mk-product-img" aria-hidden="true">${i.e}</div><div class="mk-product-info"><strong>${esc(i.name)}</strong><p>Bäst före ${dm(i.exp)} · ${esc(i.qty)}</p></div><div class="mk-product-side">${badge(i.days)}</div></div></summary>
+<div class="actions"><button class="btn btn--ghost" data-act="used" data-id="${i.id}">Markera som använd</button><button class="btn btn--ghost" data-act="del" data-id="${i.id}">Ta bort</button></div></details>`}
+function recipeCard(x){const{r,have,miss,urgent}=x,fav=st.favs.has(r.id);return`<button class="mk-recipe" style="text-align:left;font:inherit;color:inherit;cursor:pointer;padding:0;width:100%;position:relative" data-act="open" data-id="${r.id}"><div class="mk-recipe-img" style="display:grid;place-items:center;font-size:3.4rem;height:140px" aria-hidden="true">${r.e}${urgent?'<span class="mk-badge">Rädda maten</span>':''}<span style="position:absolute;right:12px;top:10px;font-size:1.3rem;color:${fav?"#ff6b81":"#fff"}">${fav?"♥":"♡"}</span></div><div class="mk-recipe-body"><h3>${r.name}</h3><p class="mk-small have">✓ ${have.join(", ")}</p>${miss.length?`<p class="mk-small miss">Saknar: ${miss.join(", ")}</p>`:""}<div class="mk-recipe-meta"><span>⏱ ${r.min} min</span><span>${r.serv} portioner</span></div></div></button>`}
 
 function viewScan(){
-const first=sorted().filter(i=>i.days<=3),rec=ranked().slice(0,2);
-return`<div class="brand">${LEAF}<span>Matkollen</span></div>
-<p class="mk-eyebrow" style="margin:2px 0 12px">Hej${acct?", "+esc(acct.name):""}!</p>
-<section class="mk-hero"><h1>Tillsammans minskar vi matsvinnet</h1><p>Skanna, upptäck och laga innan maten blir för gammal.</p><div class="actions" style="margin-top:0"><button class="mk-btn" data-act="scan">▣ Skanna vara</button><button class="mk-btn mk-btn-secondary" data-act="add">Lägg till vara</button></div></section>
-<h2>Ditt kylskåp</h2><div class="card between"><div><div class="name">${items.length} varor hemma</div><div class="muted">${first.length} behöver användas snart</div></div><button class="link" data-go="fridge">Se alla</button></div>
-<h2>Behöver användas först</h2><div class="stack">${first.length?first.map(i=>`<div class="mk-product"><div class="mk-product-img" aria-hidden="true">${i.e}</div><div class="mk-product-info"><strong>${esc(i.name)}</strong><p>${left(i.days)}</p></div><div class="mk-product-side">${badge(i.days)}</div></div>`).join(""):'<div class="card muted">Inget behöver användas just nu.</div>'}</div>
-<div class="mk-section-head"><h2>Recept som räddar maten</h2><button class="mk-link" data-go="recipe">Se alla →</button></div>
-${rec.length?`<div class="mk-recipe-grid">${rec.map(recipeCard).join("")}</div>`:'<div class="card muted">Lägg in några varor så dyker receptförslag upp här.</div>'}`}
+const first=sorted().filter(i=>i.days<=3),rec=ranked().slice(0,3);
+return`<header class="mk-header" style="padding:0 0 12px"><div class="mk-brand">${LEAF}<span>Matkollen</span></div><button class="mk-icon-btn" data-go="profile" aria-label="Min profil">♙</button></header>
+<section class="mk-hero"><div aria-hidden="true" style="position:absolute;right:12px;top:14px;font-size:3rem;line-height:1.1;text-align:center">🥕🍅<br>🥬🫑</div><h1>Tillsammans minskar vi matsvinnet</h1><p>Skanna, upptäck och laga innan maten blir för gammal.</p><button class="mk-btn" data-act="scan">▣ Skanna vara</button><button class="mk-link" data-act="add" style="display:block;margin-top:6px">Lägg till manuellt</button></section>
+<div class="mk-section-head"><div><h2>Snart dags att äta</h2><p class="muted mk-small">${first.length} ${first.length===1?"vara":"varor"}</p></div><button class="mk-link" data-go="fridge">Se alla ›</button></div>
+${first.length?`<div class="mk-snart">${first.slice(0,8).map(i=>`<div class="mk-snart-card"><div class="mk-product-img" aria-hidden="true">${i.e}</div><strong>${esc(i.name)}</strong><p>Bäst före ${dm(i.exp)}</p>${badge(i.days)}</div>`).join("")}</div>`:'<div class="card muted">Inget behöver användas just nu.</div>'}
+<div class="mk-section-head"><h2>Recept som räddar maten</h2><button class="mk-link" data-go="recipe">Se alla ›</button></div>
+${rec.length?`<div class="mk-product-list">${rec.map(x=>`<button class="mk-product" style="width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer" data-act="open" data-id="${x.r.id}"><div class="mk-product-img" aria-hidden="true">${x.r.e}</div><div class="mk-product-info"><strong>${x.r.name}</strong><p>Använder ${x.have.length} ${x.have.length===1?"vara":"varor"}</p></div><span class="mk-link" aria-hidden="true">›</span></button>`).join("")}</div>`:'<div class="card muted">Lägg in några varor så dyker receptförslag upp här.</div>'}`}
 
 function viewFridge(){
-return`<h1>Kylskåp</h1><p class="muted sub">${items.length} varor hemma</p>
-<div class="actions" style="margin-top:0"><button class="btn" data-act="scan">Skanna vara</button><button class="btn btn--ghost" data-act="add">Lägg till vara</button></div>
+return`<div class="between"><h1>Mitt kylskåp</h1><button class="mk-icon-btn" data-act="scan" aria-label="Skanna vara">▣</button></div><p class="muted sub">${items.length} varor hemma</p>
+<button class="mk-fab" data-act="add" aria-label="Lägg till vara">+</button>
 ${st.adding?`<form class="card form" id="addForm" style="margin-top:.75rem"><label>Namn<input class="input" name="n" required placeholder="Till exempel Gurka" value="${esc((st.prefill||{}).name)}"></label>
 <label>Kategori<select class="input" name="c">${CATS.slice(1).map(c=>`<option${c===(st.prefill||{}).cat?" selected":""}>${c}</option>`).join("")}</select></label>
 <label>Bäst före-datum<input class="input" name="d" type="date" required value="${toISO(addDays(5))}"></label>
@@ -352,13 +367,11 @@ if(rest.length)h+=`<h2>Övriga varor</h2><div class="stack">${rest.map(itemCard)
 $("#list").innerHTML=h}
 
 function viewRecipes(){
-let list=ranked();if(st.onlyFav)list=list.filter(x=>st.favs.has(x.r.id));
-const soon=list.filter(x=>x.urgent),other=list.filter(x=>!x.urgent);
-return`<h1>Recept med det du har hemma</h1><p class="muted sub">Vi börjar med det som går ut först.</p>
-<div class="chips" role="group" aria-label="Visa"><button class="chip" data-fav="0" aria-pressed="${!st.onlyFav}">Alla förslag</button><button class="chip" data-fav="1" aria-pressed="${st.onlyFav}">Mina favoriter</button></div>
-${!list.length?'<div class="card empty"><div class="emoji" aria-hidden="true">🍽️</div><p class="name">Inga recept matchar just nu</p><p class="muted">Lägg till fler varor eller ändra filtren för att se fler förslag.</p></div>':""}
-${soon.length?`<h2>Rädda maten</h2><div class="mk-recipe-grid">${soon.map(recipeCard).join("")}</div>`:""}
-${other.length?`<h2>Fler förslag</h2><div class="mk-recipe-grid">${other.map(recipeCard).join("")}</div>`:""}`}
+let list=ranked();if(st.onlyFav)list=list.filter(x=>st.favs.has(x.r.id));if(st.onlySoon)list=list.filter(x=>x.urgent);
+const all=!st.onlyFav&&!st.onlySoon;
+return`<h1>Recept</h1><p class="muted sub">Goda idéer baserade på maten du redan har.</p>
+<div class="chips" role="group" aria-label="Visa"><button class="chip" data-fav="0" aria-pressed="${all}">Alla</button><button class="chip" data-fav="2" aria-pressed="${!!st.onlySoon}">Snart utgång</button><button class="chip" data-fav="1" aria-pressed="${st.onlyFav}">Favoriter</button></div>
+${!list.length?'<div class="card empty" style="margin-top:14px"><div class="emoji" aria-hidden="true">🍽️</div><p class="name">Inga recept matchar just nu</p><p class="muted">Lägg till fler varor eller ändra filtret för att se fler förslag.</p></div>':`<div class="mk-recipe-grid" style="margin-top:14px">${list.map(recipeCard).join("")}</div>`}`}
 
 function viewDetail(){
 const r=RECIPES.find(x=>x.id===st.recipe),x=rInfo(r),fav=st.favs.has(r.id);
@@ -369,25 +382,30 @@ return`<button class="link" data-act="back">‹ Tillbaka</button>
 <h2>Ingredienser</h2><p class="muted" style="margin-bottom:.5rem">Mängderna räcker till ${r.serv} portioner.</p><div class="card stack">${r.ing.map(([n,a,basic])=>`<div class="between"><span class="grow"><b>${n}</b><br><span class="muted">${a}</span></span>${basic?'<span class="muted">Basvara</span>':`<span class="${has(n)?"have":"miss"}"><b>${has(n)?"Du har hemma":"Du saknar"}</b></span>`}</div>`).join("")}</div>
 <h2>Så gör du</h2><div class="card"><ol class="steps">${r.steps.map(s=>`<li>${s}</li>`).join("")}</ol></div>`}
 
-function viewProfile(){
-return`<h1>Profil</h1><p class="muted sub">Mindre matsvinn. Mer matglädje.</p>
-<div class="card stack"><div class="between"><span>Namn</span><b>${esc(acct&&acct.name)}</b></div>${acct&&acct.email?`<div class="between"><span>E-post</span><b>${esc(acct.email)}</b></div>`:""}<div class="between"><span>Varor hemma</span><b>${items.length}</b></div></div>
-<p class="muted" style="margin:1rem 0">Dina varor sparas på ditt konto, så de följer med om du loggar in på en annan enhet.</p>
-<div class="actions"><button class="btn" data-act="logout">Logga ut</button><button class="btn btn--ghost" data-act="reset">Ta bort alla mina varor</button></div>
-<div class="actions"><button class="btn btn--ghost" data-act="delacct" style="color:var(--mk-danger);border-color:var(--mk-danger)">Ta bort mitt konto</button></div>`}
+function viewProfile(){const nm=(acct&&acct.name)||"";
+const row='width:100%;background:none;border:0;border-bottom:1px solid var(--mk-border);color:inherit;text-align:left;cursor:pointer;font:inherit';
+return`<div style="text-align:center;padding:6px 0 2px"><div class="mk-avatar" aria-hidden="true">🌿</div><h1 style="margin-top:12px">${esc(nm)}</h1>${acct&&acct.email?`<p class="muted">${esc(acct.email)}</p>`:""}</div>
+<div class="mk-card mk-card-pad" style="margin-top:14px">
+<button class="mk-setting-row" style="${row}" data-go="fridge"><span class="mk-setting-icon" aria-hidden="true">▣</span><span class="mk-setting-copy"><strong>Mina varor</strong><p>${items.length} varor hemma</p></span><span aria-hidden="true">›</span></button>
+<button class="mk-setting-row" style="${row}" data-act="gofavs"><span class="mk-setting-icon" aria-hidden="true">♡</span><span class="mk-setting-copy"><strong>Favoritrecept</strong><p>Dina sparade recept</p></span><span aria-hidden="true">›</span></button>
+<a class="mk-setting-row" style="${row};text-decoration:none" href="mailto:Matkollen@gmail.com"><span class="mk-setting-icon" aria-hidden="true">?</span><span class="mk-setting-copy"><strong>Hjälp och support</strong><p>Fråga oss via e-post</p></span><span aria-hidden="true">›</span></a>
+<div class="mk-setting-row" style="opacity:.55;border:0"><span class="mk-setting-icon" aria-hidden="true">⚙</span><span class="mk-setting-copy"><strong>Inställningar</strong><p>Notiser och mer, kommer snart</p></span></div></div>
+<div class="actions"><button class="btn btn--ghost" style="width:100%;color:var(--mk-green);border-color:var(--mk-green)" data-act="logout">Logga ut</button></div>
+<p class="muted mk-small" style="margin:14px 0 0">Dina varor sparas på ditt konto, så de följer med om du loggar in på en annan enhet.</p>
+<div class="actions"><button class="btn btn--ghost" data-act="reset">Ta bort alla mina varor</button><button class="btn btn--ghost" data-act="delacct" style="color:var(--mk-danger);border-color:var(--mk-danger)">Ta bort mitt konto</button></div>`}
 
-const ONB=[["🌿","Välkommen till Matkollen","Minska matsvinnet och spara pengar. Matkollen hjälper dig använda maten innan den går ut."],["▣","Skanna och håll koll på datum","Skanna streckkoden eller lägg in varan själv, så håller appen koll på bäst före-datum åt dig."],["🍳","Recept som räddar maten","Du får receptförslag på det du har hemma, och det som går ut först kommer överst."],["🔔","Smarta notiser","Få en påminnelse när något snart går ut, så att du hinner använda det."],["🌍","Gör skillnad","Varje vara du räddar är mat som inte slängs. Skapa ett konto så sparas allt åt dig."]];
+const ONB=[["🌿","Matkollen","Mindre matsvinn. Mer god mat.<br><br>Välkommen till Matkollen! En smart app som hjälper dig hålla koll på maten du har hemma och gör det enkelt att använda den innan den blir gammal."],["▣","Skanna och håll koll","Skanna det du handlat och lägg till varorna i ditt kylskåp eller skafferi. Ange bäst före- eller sista förbrukningsdatum."],["🍳","Recept som räddar maten","Få personliga recept som använder de varor som snart går ut, så att ingen mat slängs och du sparar både pengar och miljö."],["🔔","Smarta notiser","Få påminnelser när det är dags att använda varor som snart går ut. Notiserna hjälper dig att komma ihåg maten innan den riskerar att slängas."],["🌍","Gör skillnad","Tillsammans minskar vi matsvinn, sparar pengar och bidrar till en mer hållbar framtid."]];
 function viewOnb(){const i=st.onb,[e,t,d]=ONB[i],last=i===ONB.length-1;
 return`<div class="mk-onboarding" style="padding:0;min-height:calc(100dvh - 40px);background:none"><div class="mk-onboard-progress">${i+1} / ${ONB.length}</div>
 <div class="mk-onboard-content"><div class="mk-onboard-art" style="display:grid;place-items:center;height:30vh;font-size:5rem;background:radial-gradient(ellipse at 50% 30%,rgba(57,210,103,.25),transparent 60%),linear-gradient(135deg,#153026,#07120d);border:1px solid var(--mk-border)" aria-hidden="true">${e}</div><h1>${t}</h1><p>${d}</p></div>
-<div class="mk-onboard-footer">${last?'<button class="mk-btn mk-btn-block" data-act="onbsignup">Skapa konto</button><button class="mk-btn mk-btn-secondary mk-btn-block" data-act="onblogin">Logga in</button>':""}
+<div class="mk-onboard-footer">${i===0?'<button class="mk-btn mk-btn-block" data-act="onbnext">Kom igång →</button>':""}${last?'<button class="mk-btn mk-btn-block" data-act="onbsignup">Skapa konto</button><button class="mk-btn mk-btn-secondary mk-btn-block" data-act="onblogin">Logga in</button>':""}
 <div class="mk-onboard-controls"><button class="mk-onboard-arrow" data-act="onbprev" aria-label="Föregående" ${i?"":"disabled"}>‹</button><div class="mk-dots" aria-hidden="true">${ONB.map((_,k)=>`<span class="mk-dot${k===i?" is-active":""}"></span>`).join("")}</div>${last?'<span style="width:42px"></span>':'<button class="mk-onboard-arrow" data-act="onbnext" aria-label="Nästa">›</button>'}</div>
 <button class="mk-link" data-act="onbskip">Hoppa över</button></div></div>`}
 function viewAuth(){
 const m=st.authMode,su=m==="signup",main=m==="signup"||m==="login";
 const head=main?"Använd maten innan den går ut":{forgot:"Glömt lösenordet?",reset:"Välj nytt lösenord"}[m];
 const sub=main?"Matkollen visar vad i kylskåpet som går ut först, påminner dig i tid och föreslår recept på det.":"Mindre matsvinn. Mer matglädje.";
-const feats=main?`<div class="stack" style="margin-bottom:1.25rem">
+const feats=main?`<div class="stack">
 <div class="card row"><div class="emoji" aria-hidden="true">⏰</div><div class="grow"><div class="name">Håll koll på bäst före-datum</div><div class="muted">Skanna streckkoden eller skriv in varan. Du ser direkt vad som behöver användas först.</div></div></div>
 <div class="card row"><div class="emoji" aria-hidden="true">🔔</div><div class="grow"><div class="name">Notiser när varor håller på att gå ut</div><div class="muted">Du får en påminnelse i tid, så att du hinner använda maten innan den blir dålig.</div></div></div>
 <div class="card row"><div class="emoji" aria-hidden="true">🍳</div><div class="grow"><div class="name">Recept som räddar maten</div><div class="muted">Appen föreslår recept och sätter varorna som går ut snarast överst, så att inget slängs i onödan.</div></div></div></div>`:"";
@@ -398,7 +416,6 @@ login:'<button class="link" data-act="forgot" style="margin-top:.5rem">Glömt l�
 forgot:'<button class="link" data-act="tologin" style="margin-top:.5rem">Tillbaka till inloggning</button>',reset:""}[m];
 return`<div style="padding-top:1.5rem"><div class="brand">${LEAF}<span>Matkollen</span></div>
 <h1>${head}</h1><p class="muted sub">${sub}</p>
-${feats}
 <form class="card form" id="authForm">${formHead}
 ${su?'<label>Namn<input class="input" name="n" required autocomplete="given-name" placeholder="Ditt förnamn"></label>':""}
 ${m!=="reset"?'<label>E-post<input class="input" name="e" type="email" required autocomplete="email" placeholder="namn@exempel.se"></label>':""}
@@ -406,6 +423,7 @@ ${m!=="forgot"?`<label>${m==="reset"?"Nytt lösenord":"Lösenord"}<input class="
 <p id="authMsg" class="miss" role="alert"></p>
 <button class="btn" type="submit">${btn}</button></form>
 ${links}
+<div style="margin-top:1.25rem">${feats}</div>
 <p class="muted" style="margin-top:1rem;font-size:.875rem">${su?"Genom att skapa konto godkänner du vår ":"Läs vår "}<a href="integritet.html" style="color:var(--mk-green);font-weight:600">integritetspolicy</a>.</p></div>`}
 
 function render(){
@@ -422,8 +440,9 @@ const b=e.target.closest("[data-go],[data-act],[data-cat],[data-fav]");if(!b)ret
 const D=b.dataset,id=D.id;
 if(D.go){st.tab=D.go;st.recipe=null;st.adding=false;window.scrollTo(0,0)}
 else if(D.cat){st.cat=D.cat}
-else if(D.fav){st.onlyFav=D.fav==="1"}
-else if(D.act==="add"){st.tab="fridge";st.adding=true;st.prefill=null}
+else if(D.fav){st.onlyFav=D.fav==="1";st.onlySoon=D.fav==="2"}
+else if(D.act==="gofavs"){st.tab="recipe";st.recipe=null;st.onlyFav=true;st.onlySoon=false}
+else if(D.act==="add"){window.scrollTo(0,0);st.tab="fridge";st.adding=true;st.prefill=null}
 else if(D.act==="scan"){openScan();return}
 else if(D.act==="closescan"){closeScan();return}
 else if(D.act==="demo"){await addDemo()}
